@@ -1,5 +1,22 @@
 package data
 
+const (
+	TypeUndefined   = RecordType(0)
+	TypeCredentials = RecordType(1)
+	TypeBankCard    = RecordType(2)
+	TypeText        = RecordType(3)
+	TypeBinary      = RecordType(4)
+)
+
+const (
+	StrCredentials = "creds"
+	StrBankCard    = "card"
+	StrText        = "text"
+	StrBinary      = "bin"
+)
+
+type RecordType = int32
+
 //go:generate easyjson -all data.go
 type Credentials struct {
 	Key      string `json:"key"`
@@ -21,14 +38,12 @@ type Binary struct {
 	Data string `json:"data"`
 }
 
-type MetaData struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
+type MetaData map[string]string
 
 type Record struct {
 	Id          int64        `json:"id"`
-	MetaData    []MetaData   `json:"meta_data,omitempty"`
+	RecordType  RecordType   `json:"record_type"`
+	MetaData    MetaData     `json:"meta_data,omitempty"`
 	Credentials *Credentials `json:"credentials,omitempty"`
 	BankCard    *BankCard    `json:"bank_card,omitempty"`
 	Text        *Text        `json:"text,omitempty"`

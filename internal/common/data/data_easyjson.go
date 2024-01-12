@@ -102,28 +102,29 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(in *jle
 			continue
 		}
 		switch key {
+		case "id":
+			out.Id = int64(in.Int64())
+		case "record_type":
+			out.RecordType = int32(in.Int32())
 		case "meta_data":
 			if in.IsNull() {
 				in.Skip()
-				out.MetaData = nil
 			} else {
-				in.Delim('[')
-				if out.MetaData == nil {
-					if !in.IsDelim(']') {
-						out.MetaData = make([]MetaData, 0, 2)
-					} else {
-						out.MetaData = []MetaData{}
-					}
+				in.Delim('{')
+				if !in.IsDelim('}') {
+					out.MetaData = make(MetaData)
 				} else {
-					out.MetaData = (out.MetaData)[:0]
+					out.MetaData = nil
 				}
-				for !in.IsDelim(']') {
-					var v1 MetaData
-					(v1).UnmarshalEasyJSON(in)
-					out.MetaData = append(out.MetaData, v1)
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v1 string
+					v1 = string(in.String())
+					(out.MetaData)[key] = v1
 					in.WantComma()
 				}
-				in.Delim(']')
+				in.Delim('}')
 			}
 		case "credentials":
 			if in.IsNull() {
@@ -179,59 +180,53 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData1(out *jw
 	out.RawByte('{')
 	first := true
 	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.Int64(int64(in.Id))
+	}
+	{
+		const prefix string = ",\"record_type\":"
+		out.RawString(prefix)
+		out.Int32(int32(in.RecordType))
+	}
 	if len(in.MetaData) != 0 {
 		const prefix string = ",\"meta_data\":"
-		first = false
-		out.RawString(prefix[1:])
+		out.RawString(prefix)
 		{
-			out.RawByte('[')
-			for v2, v3 := range in.MetaData {
-				if v2 > 0 {
+			out.RawByte('{')
+			v2First := true
+			for v2Name, v2Value := range in.MetaData {
+				if v2First {
+					v2First = false
+				} else {
 					out.RawByte(',')
 				}
-				(v3).MarshalEasyJSON(out)
+				out.String(string(v2Name))
+				out.RawByte(':')
+				out.String(string(v2Value))
 			}
-			out.RawByte(']')
+			out.RawByte('}')
 		}
 	}
 	if in.Credentials != nil {
 		const prefix string = ",\"credentials\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Credentials).MarshalEasyJSON(out)
 	}
 	if in.BankCard != nil {
 		const prefix string = ",\"bank_card\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.BankCard).MarshalEasyJSON(out)
 	}
 	if in.Text != nil {
 		const prefix string = ",\"text\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Text).MarshalEasyJSON(out)
 	}
 	if in.Binary != nil {
 		const prefix string = ",\"binary\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix)
 		(*in.Binary).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
@@ -260,80 +255,7 @@ func (v *Record) UnmarshalJSON(data []byte) error {
 func (v *Record) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(l, v)
 }
-func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jlexer.Lexer, out *MetaData) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "key":
-			out.Key = string(in.String())
-		case "value":
-			out.Value = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jwriter.Writer, in MetaData) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"key\":"
-		out.RawString(prefix[1:])
-		out.String(string(in.Key))
-	}
-	{
-		const prefix string = ",\"value\":"
-		out.RawString(prefix)
-		out.String(string(in.Value))
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v MetaData) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v MetaData) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *MetaData) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *MetaData) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(l, v)
-}
-func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(in *jlexer.Lexer, out *Credentials) {
+func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jlexer.Lexer, out *Credentials) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -366,7 +288,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(in *jle
 		in.Consumed()
 	}
 }
-func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(out *jwriter.Writer, in Credentials) {
+func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jwriter.Writer, in Credentials) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -386,27 +308,27 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v Credentials) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(&w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Credentials) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Credentials) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(&r, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Credentials) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(l, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(l, v)
 }
-func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(in *jlexer.Lexer, out *Binary) {
+func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(in *jlexer.Lexer, out *Binary) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -437,7 +359,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(in *jle
 		in.Consumed()
 	}
 }
-func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(out *jwriter.Writer, in Binary) {
+func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(out *jwriter.Writer, in Binary) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -452,27 +374,27 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v Binary) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(&w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Binary) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Binary) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(&r, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Binary) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(l, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(l, v)
 }
-func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData5(in *jlexer.Lexer, out *BankCard) {
+func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(in *jlexer.Lexer, out *BankCard) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -509,7 +431,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData5(in *jle
 		in.Consumed()
 	}
 }
-func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData5(out *jwriter.Writer, in BankCard) {
+func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(out *jwriter.Writer, in BankCard) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -539,23 +461,23 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData5(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v BankCard) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData5(&w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v BankCard) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData5(w, v)
+	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *BankCard) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData5(&r, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *BankCard) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData5(l, v)
+	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData4(l, v)
 }
