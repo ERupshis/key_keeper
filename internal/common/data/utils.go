@@ -10,6 +10,8 @@ func ConvertStringToRecordType(str string) RecordType {
 		return TypeText
 	case StrBinary:
 		return TypeBinary
+	case StrAny:
+		return TypeAny
 	default:
 		return TypeUndefined
 	}

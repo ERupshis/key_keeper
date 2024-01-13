@@ -6,6 +6,7 @@ const (
 	TypeBankCard    = RecordType(2)
 	TypeText        = RecordType(3)
 	TypeBinary      = RecordType(4)
+	TypeAny         = RecordType(5)
 )
 
 const (
@@ -13,6 +14,7 @@ const (
 	StrBankCard    = "card"
 	StrText        = "text"
 	StrBinary      = "bin"
+	StrAny         = "any"
 )
 
 type RecordType = int32

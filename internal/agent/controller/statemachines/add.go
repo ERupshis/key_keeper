@@ -11,12 +11,12 @@ import (
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-type AddState int
+type state int
 
 const (
-	AddInitialState  = AddState(0)
-	addMainDataState = AddState(1)
-	AddFinishState   = AddState(2)
+	addInitialState  = state(0)
+	addMainDataState = state(1)
+	addFinishState   = state(2)
 )
 
 type AddConfig struct {
@@ -25,11 +25,11 @@ type AddConfig struct {
 }
 
 func Add(cfg AddConfig) error {
-	currentState := AddInitialState
+	currentState := addInitialState
 
-	for currentState != AddFinishState {
+	for currentState != addFinishState {
 		switch currentState {
-		case AddInitialState:
+		case addInitialState:
 			{
 				if err := cfg.MainData(cfg.Record); err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
@@ -49,7 +49,7 @@ func Add(cfg AddConfig) error {
 						continue
 					}
 				}
-				currentState = AddFinishState
+				currentState = addFinishState
 			}
 		}
 	}
@@ -58,12 +58,11 @@ func Add(cfg AddConfig) error {
 }
 
 // MAIN DATA STATE MACHINE.
-type state int
 
 const (
-	addInitialState  = state(0)
-	addMetaDataState = state(1)
-	addFinishState   = state(2)
+	addMetaInitialState = state(0)
+	addMetaDataState    = state(1)
+	addMetaFinishState  = state(2)
 )
 
 var (
@@ -71,13 +70,13 @@ var (
 )
 
 func addMetaData(record *data.Record) error {
-	currentState := addInitialState
+	currentState := addMetaInitialState
 
 	var err error
-	for currentState != addFinishState {
+	for currentState != addMetaFinishState {
 		switch currentState {
-		case addInitialState:
-			currentState = stateInitial()
+		case addMetaInitialState:
+			currentState = stateMetaInitial()
 		case addMetaDataState:
 			{
 				currentState, err = stateMetaData(record)
@@ -91,8 +90,13 @@ func addMetaData(record *data.Record) error {
 	return nil
 }
 
-func stateInitial() state {
-	fmt.Print("insert meta data(format: 'some_name : some_value' without quotes) or 'cancel' or 'save': ")
+func stateMetaInitial() state {
+	fmt.Printf(
+		"insert meta data(format: 'key%svalue') or '%s' or '%s': ",
+		utils.MetaSeparator,
+		utils.CommandCancel,
+		utils.CommandSave,
+	)
 	return addMetaDataState
 }
 
@@ -100,8 +104,8 @@ func stateMetaData(record *data.Record) (state, error) {
 	metaData, ok, err := utils.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
-		fmt.Printf("inserted metadata: %+v\n", record.MetaData)
-		return addFinishState, err
+		fmt.Printf("inserted metadata: %v\n", record.MetaData)
+		return addMetaFinishState, err
 	}
 
 	if !ok {
@@ -112,12 +116,12 @@ func stateMetaData(record *data.Record) (state, error) {
 		return addMetaDataState, err
 	}
 
-	parts := strings.Split(metaData, " : ")
+	parts := strings.Split(metaData, utils.MetaSeparator)
 
 	if record.MetaData == nil {
 		record.MetaData = make(data.MetaData)
 	}
 
 	record.MetaData[parts[0]] = parts[1]
-	return addInitialState, nil
+	return addMetaInitialState, nil
 }
