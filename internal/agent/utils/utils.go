@@ -2,7 +2,9 @@ package utils
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -12,14 +14,17 @@ import (
 
 var reader = bufio.NewReader(os.Stdin)
 
+// TODO: need Read/Writer class with DI streams
 func GetUserInputAndValidate(regex *regexp.Regexp) (string, bool, error) {
 	input, err := getUserInput()
-	input = strings.TrimRight(input, "\r\n")
 	if err != nil {
-		fmt.Printf("unexpected error, try again: %v\n", err)
+		if !errors.Is(err, io.EOF) {
+			fmt.Printf("unexpected error, try again: %v\n", err)
+		}
 		return "", false, nil
 	}
 
+	input = strings.TrimSpace(strings.TrimRight(input, "\r\n"))
 	if input == CommandCancel {
 		return input, true, errs.ErrInterruptedByUser
 	}

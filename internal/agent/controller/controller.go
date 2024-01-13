@@ -10,13 +10,8 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
+	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
-)
-
-const (
-	CommandUndefined = ""
-	CommandAdd       = "add"
-	CommandExit      = "exit"
 )
 
 type Controller struct {
@@ -45,25 +40,17 @@ loop:
 			continue
 		}
 
-		if len(parts) != 2 {
-			fmt.Println("incorrect request. Should contain command 'add' and object type('bank', 'cards', 'text', 'bin').")
-			continue
-		}
-
 		switch strings.ToLower(parts[0]) {
-		case CommandAdd:
-			record, err := c.processAddCommand(data.ConvertStringToRecordType(parts[1]))
-			if err != nil {
-				fmt.Printf("request parsing error: %v\n", err)
-				if errors.Is(err, errs.ErrIncorrectRecordType) {
-					fmt.Printf("only ('bank', 'cards', 'text', 'bin') are supported\n")
+		case utils.CommandAdd:
+			ok, needToContinueExecution := c.commandAdd(parts)
+			if !needToContinueExecution {
+				if ok {
+					continue
+				} else {
+					break
 				}
-				break
 			}
-
-			// TODO: print added data.
-			fmt.Printf("record added: %+v\n", record)
-		case CommandExit:
+		case utils.CommandExit:
 			fmt.Println("Выход из приложения.")
 			break loop
 		default:
@@ -74,6 +61,30 @@ loop:
 	}
 
 	return nil
+}
+
+func (c *Controller) commandAdd(parts []string) (bool, bool) {
+	if len(parts) != 2 {
+		fmt.Println("incorrect request. Should contain command 'add' and object type('bank', 'cards', 'text', 'bin').")
+		return true, false
+	}
+
+	record, err := c.processAddCommand(data.ConvertStringToRecordType(parts[1]))
+	if err != nil {
+		if errors.Is(err, errs.ErrInterruptedByUser) {
+			fmt.Printf("add operation was canceled by user\n")
+			return false, false
+		}
+
+		fmt.Printf("request parsing error: %v\n", err)
+		if errors.Is(err, errs.ErrIncorrectRecordType) {
+			fmt.Printf("only ('bank', 'cards', 'text', 'bin') are supported\n")
+		}
+		return false, false
+	}
+
+	fmt.Printf("record added: %+v\n", record)
+	return true, true
 }
 
 func (c *Controller) processAddCommand(recordType data.RecordType) (*data.Record, error) {

@@ -18,9 +18,6 @@ func ProcessAddCommand(record *data.Record) error {
 	cfg := statemachines.AddConfig{
 		Record:   record,
 		MainData: addMainData,
-		MetaData: func(record *data.Record) error {
-			return nil
-		},
 	}
 
 	return statemachines.Add(cfg)
