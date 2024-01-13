@@ -29,8 +29,8 @@ func GetUserInputAndValidate(regex *regexp.Regexp) (string, bool, error) {
 		return input, true, errs.ErrInterruptedByUser
 	}
 
-	if !regex.MatchString(input) {
-		fmt.Printf("incorrect input, try again or interrupt by 'cancel' command: ")
+	if regex != nil && !regex.MatchString(input) {
+		fmt.Printf("incorrect input, try again or interrupt by '%s' command: ", CommandCancel)
 		return "", false, nil
 	}
 

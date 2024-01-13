@@ -1,32 +1,33 @@
-package controller
+package commands
 
 import (
 	"fmt"
 
-	"github.com/erupshis/key_keeper/internal/agent/controller/statemachines"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func (c *Controller) handleGetCommand(parts []string) (bool, bool) {
+func Get(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrAny, data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
 		fmt.Printf("incorrect request. should contain command '%s' and object type(%v)\n", utils.CommandGet, supportedTypes)
-		return true, false
+		return
 	}
 
-	records, err := c.processGetCommand(data.ConvertStringToRecordType(parts[1]))
+	records, err := processGetCommand(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		c.handleProcessError(err, utils.CommandGet, supportedTypes)
-		return false, false
+		handleProcessError(err, utils.CommandGet, supportedTypes)
+		return
 	}
 
-	c.writeGetResult(records)
-	return true, true
+	writeGetResult(records)
+	return
 }
 
-func (c *Controller) writeGetResult(records []data.Record) {
+func writeGetResult(records []data.Record) {
 	if len(records) == 0 {
 		fmt.Printf("missing record with given id\n")
 	} else {
@@ -37,7 +38,7 @@ func (c *Controller) writeGetResult(records []data.Record) {
 	}
 }
 
-func (c *Controller) processGetCommand(recordType data.RecordType) ([]data.Record, error) {
+func processGetCommand(recordType data.RecordType, storage *inmemory.Storage) ([]data.Record, error) {
 	if recordType == data.TypeUndefined {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrIncorrectRecordType)
 	}
@@ -48,18 +49,18 @@ func (c *Controller) processGetCommand(recordType data.RecordType) ([]data.Recor
 	}
 
 	if id != nil {
-		return c.getRecordByID(*id)
+		return getRecordByID(*id, storage)
 	}
 
 	if filters != nil {
-		return c.getRecordByFilters(recordType, filters)
+		return getRecordByFilters(recordType, filters, storage)
 	}
 
 	return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrUnexpected)
 }
 
-func (c *Controller) getRecordByID(id int64) ([]data.Record, error) {
-	record, err := c.inmemory.GetRecord(id)
+func getRecordByID(id int64, storage *inmemory.Storage) ([]data.Record, error) {
+	record, err := storage.GetRecord(id)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
 	}
@@ -71,8 +72,8 @@ func (c *Controller) getRecordByID(id int64) ([]data.Record, error) {
 	return []data.Record{*record}, nil
 }
 
-func (c *Controller) getRecordByFilters(recordType data.RecordType, filters map[string]string) ([]data.Record, error) {
-	records, err := c.inmemory.GetRecords(recordType, filters)
+func getRecordByFilters(recordType data.RecordType, filters map[string]string, storage *inmemory.Storage) ([]data.Record, error) {
+	records, err := storage.GetRecords(recordType, filters)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
 	}

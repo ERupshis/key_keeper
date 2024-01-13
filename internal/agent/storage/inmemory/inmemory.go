@@ -6,6 +6,7 @@ import (
 
 type Storage struct {
 	records []data.Record
+	// TODO: need to added last local id and refresh it during syncing.
 }
 
 func NewStorage() *Storage {

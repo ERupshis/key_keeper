@@ -1,11 +1,10 @@
 package controller
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 )
@@ -19,56 +18,40 @@ func NewController(inmemory *inmemory.Storage) *Controller {
 }
 
 func (c *Controller) Serve() error {
-	reader := bufio.NewReader(os.Stdin)
 loop:
 	for {
-		fmt.Print("Введите команду (exit для выхода): ")
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Println("Ошибка чтения ввода:", err)
+		commandParts, ok := readCommand()
+		if !ok {
 			continue
 		}
 
-		command := strings.TrimSpace(input)
-		parts := strings.Split(command, " ")
-		if len(parts) == 0 {
-			fmt.Println("Empty command. Try again.")
-			continue
-		}
-
-		switch strings.ToLower(parts[0]) {
+		switch strings.ToLower(commandParts[0]) {
 		case utils.CommandAdd:
-			ok, needToContinueExecution := c.handleAddCommand(parts)
-			if !needToContinueExecution {
-				if ok {
-					continue
-				} else {
-					break
-				}
-			}
+			commands.Add(commandParts, c.inmemory)
 		case utils.CommandGet:
-			ok, needToContinueExecution := c.handleGetCommand(parts)
-			if !needToContinueExecution {
-				if ok {
-					continue
-				} else {
-					break
-				}
-			}
+			commands.Get(commandParts, c.inmemory)
 		case utils.CommandExit:
-			fmt.Println("Выход из приложения.")
+			fmt.Printf("Exit from app\n")
 			break loop
 		default:
-			fmt.Println("Unknown command.")
+			if len(commandParts) != 0 && commandParts[0] != "" {
+				fmt.Printf("Unknown command: '%s'\n", strings.Join(commandParts, " "))
+			}
 		}
-
-		c.processCommand(command)
 	}
 
 	return nil
 }
 
-func (c *Controller) processCommand(command string) {
-	fmt.Printf("Вы ввели команду: %s\n", command)
-	// Здесь можно добавить логику для обработки конкретных команд
+func readCommand() ([]string, bool) {
+	fmt.Printf("Insert command (or '%s'): ", utils.CommandExit)
+	command, _, _ := utils.GetUserInputAndValidate(nil)
+	command = strings.TrimSpace(command)
+	commandParts := strings.Split(command, " ")
+	if len(commandParts) == 0 {
+		fmt.Printf("Empty command. Try again\n")
+		return nil, false
+	}
+
+	return commandParts, true
 }

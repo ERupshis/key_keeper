@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/erupshis/key_keeper/internal/agent/controller"
@@ -9,8 +8,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Простое CLI-приложение")
-
 	inMemoryStorage := inmemory.NewStorage()
 	mainController := controller.NewController(inMemoryStorage)
 

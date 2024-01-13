@@ -1,4 +1,4 @@
-package controller
+package commands
 
 import (
 	"errors"
@@ -6,28 +6,29 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func (c *Controller) handleAddCommand(parts []string) (bool, bool) {
+func Add(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
 		fmt.Printf("incorrect request. should contain command '%s' and object type(%v)\n", utils.CommandAdd, supportedTypes)
-		return true, false
+		return
 	}
 
-	record, err := c.processAddCommand(data.ConvertStringToRecordType(parts[1]))
+	record, err := processAddCommand(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		c.handleProcessError(err, utils.CommandAdd, supportedTypes)
-		return false, false
+		handleProcessError(err, utils.CommandAdd, supportedTypes)
+		return
 	}
 
 	fmt.Printf("record added: %+v\n", record)
-	return true, true
+	return
 }
 
-func (c *Controller) handleProcessError(err error, command string, supportedTypes []string) {
+func handleProcessError(err error, command string, supportedTypes []string) {
 	if errors.Is(err, errs.ErrInterruptedByUser) {
 		fmt.Printf("'%s' command was canceled by user\n", command)
 		return
@@ -39,7 +40,7 @@ func (c *Controller) handleProcessError(err error, command string, supportedType
 	}
 }
 
-func (c *Controller) processAddCommand(recordType data.RecordType) (*data.Record, error) {
+func processAddCommand(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
 	newRecord := &data.Record{
 		Id: -1,
 	}
@@ -56,7 +57,7 @@ func (c *Controller) processAddCommand(recordType data.RecordType) (*data.Record
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, err)
 	}
 
-	if err = c.inmemory.AddRecord(newRecord); err != nil {
+	if err = storage.AddRecord(newRecord); err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, err)
 	}
 
