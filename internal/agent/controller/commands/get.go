@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
@@ -13,7 +15,7 @@ import (
 func Get(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrAny, data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
-		fmt.Printf("incorrect request. should contain command '%s' and object type(%v)\n", utils.CommandGet, supportedTypes)
+		fmt.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandGet, supportedTypes)
 		return
 	}
 
@@ -32,9 +34,15 @@ func writeGetResult(records []data.Record) {
 		fmt.Printf("missing record(s)\n")
 	} else {
 		fmt.Printf("found '%d' records:\n", len(records))
+		fmt.Printf("-----\n")
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		for idx, record := range records {
-			fmt.Printf("   %d. %+v\n", idx, record)
+			_, _ = fmt.Fprintf(w, fmt.Sprintf("   %d.%s\n", idx, record.TabString()))
 		}
+		_ = w.Flush()
+
+		fmt.Printf("-----\n")
 	}
 }
 

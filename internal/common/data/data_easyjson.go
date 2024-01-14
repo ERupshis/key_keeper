@@ -103,7 +103,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(in *jle
 		}
 		switch key {
 		case "id":
-			out.Id = int64(in.Int64())
+			out.ID = int64(in.Int64())
 		case "record_type":
 			out.RecordType = int32(in.Int32())
 		case "meta_data":
@@ -183,7 +183,7 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData1(out *jw
 	{
 		const prefix string = ",\"id\":"
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.Id))
+		out.Int64(int64(in.ID))
 	}
 	{
 		const prefix string = ",\"record_type\":"

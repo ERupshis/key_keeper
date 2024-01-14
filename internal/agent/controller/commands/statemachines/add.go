@@ -105,7 +105,7 @@ func stateMetaData(record *data.Record) (stateAddMeta, error) {
 	metaData, ok, err := utils.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
-		fmt.Printf("inserted metadata: %v\n", record.MetaData)
+		fmt.Printf("inserted metadata: %s\n", record.MetaData)
 		return addMetaFinishState, err
 	}
 

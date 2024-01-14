@@ -22,7 +22,7 @@ var (
 	regexConfirmApprove = regexp.MustCompile(`^(yes|no)$`)
 )
 
-func Confirm(record *data.Record) (bool, error) {
+func Confirm(record *data.Record, command string) (bool, error) {
 	currentState := confirmInitialState
 
 	var confirmed bool
@@ -30,7 +30,7 @@ func Confirm(record *data.Record) (bool, error) {
 		switch currentState {
 		case confirmInitialState:
 			{
-				currentState = stateConfirmInitial(record)
+				currentState = stateConfirmInitial(record, command)
 			}
 		case confirmApproveState:
 			{
@@ -52,8 +52,16 @@ func Confirm(record *data.Record) (bool, error) {
 	return confirmed, nil
 }
 
-func stateConfirmInitial(record *data.Record) stateConfirm {
-	fmt.Printf("Do you really want to permanently delete the record '%v'(yes/no): ", record)
+func stateConfirmInitial(record *data.Record, command string) stateConfirm {
+	switch command {
+	case utils.CommandDelete:
+		fmt.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
+	case utils.CommandUpdate:
+		fmt.Printf("Do you really want to update the record '%s'(yes/no): ", record)
+	default:
+		fmt.Printf("Do you really want to commit action with record '%s'(yes/no): ", record)
+	}
+
 	return confirmApproveState
 }
 

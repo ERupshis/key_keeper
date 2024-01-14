@@ -6,7 +6,7 @@ import (
 
 func (s *Storage) GetRecord(id int64) (*data.Record, error) {
 	for _, rec := range s.records {
-		if rec.Id == id {
+		if rec.ID == id {
 			return &rec, nil
 		}
 	}

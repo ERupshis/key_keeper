@@ -14,7 +14,7 @@ import (
 func Add(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
-		fmt.Printf("incorrect request. should contain command '%s' and object type(%v)\n", utils.CommandAdd, supportedTypes)
+		fmt.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandAdd, supportedTypes)
 		return
 	}
 
@@ -24,7 +24,7 @@ func Add(parts []string, storage *inmemory.Storage) {
 		return
 	}
 
-	fmt.Printf("record added: %+v\n", record)
+	fmt.Printf("record added: %s\n", record)
 	return
 }
 
@@ -36,14 +36,14 @@ func handleCommandError(err error, command string, supportedTypes []string) {
 
 	fmt.Printf("request parsing error: %v", err)
 	if errors.Is(err, errs.ErrIncorrectRecordType) {
-		fmt.Printf(". only (%v) are supported", supportedTypes)
+		fmt.Printf(". only (%s) are supported", supportedTypes)
 	}
 	fmt.Printf("\n")
 }
 
 func handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
 	newRecord := &data.Record{
-		Id: -1,
+		ID: -1,
 	}
 
 	var err error

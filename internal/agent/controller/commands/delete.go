@@ -59,7 +59,7 @@ func confirmAndDeleteByID(record *data.Record, storage *inmemory.Storage) error 
 	}
 
 	if confirmed {
-		if err = storage.DeleteRecord(record.Id); err != nil {
+		if err = storage.DeleteRecord(record.ID); err != nil {
 			return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandDelete, err)
 		}
 		fmt.Printf("Record sucessfully deleted\n")

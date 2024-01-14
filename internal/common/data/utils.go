@@ -17,9 +17,49 @@ func ConvertStringToRecordType(str string) RecordType {
 	}
 }
 
+func ConvertRecordTypeToString(recordType RecordType) string {
+	switch recordType {
+	case TypeCredentials:
+		return StrCredentials
+	case TypeBankCard:
+		return StrBankCard
+	case TypeText:
+		return StrText
+	case TypeBinary:
+		return StrBinary
+	case TypeAny:
+		return StrAny
+	default:
+		return StrUndefined
+	}
+}
+
+func getRecordValue(record *Record) interface{} {
+	switch record.RecordType {
+	case TypeCredentials:
+		if record.Credentials != nil {
+			return *record.Credentials
+		}
+	case TypeBankCard:
+		if record.BankCard != nil {
+			return *record.BankCard
+		}
+	case TypeText:
+		if record.Text != nil {
+			return *record.Text
+		}
+	case TypeBinary:
+		if record.Binary != nil {
+			return *record.Binary
+		}
+	}
+
+	return DataInvalid
+}
+
 func DeepCopyRecord(record *Record) *Record {
 	var res Record
-	res.Id = record.Id
+	res.ID = record.ID
 	res.RecordType = record.RecordType
 
 	res.MetaData = make(MetaData)

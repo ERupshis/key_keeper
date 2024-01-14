@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Storage) AddRecord(record *data.Record) error {
-	record.Id = s.getNextFreeIdx()
+	record.ID = s.getNextFreeIdx()
 	record.UpdatedAt = time.Now()
 	s.records = append(s.records, *record)
 	return nil
@@ -15,7 +15,7 @@ func (s *Storage) AddRecord(record *data.Record) error {
 
 func (s *Storage) AddRecords(records []data.Record) error {
 	for idx := range records {
-		records[idx].Id = s.getNextFreeIdx()
+		records[idx].ID = s.getNextFreeIdx()
 		records[idx].UpdatedAt = time.Now()
 	}
 

@@ -248,7 +248,7 @@ func stateGetFiltersValue(filters map[string]string) (stateGetFilters, error) {
 	metaData, ok, err := utils.GetUserInputAndValidate(regexGetFilters)
 
 	if metaData == utils.CommandContinue {
-		fmt.Printf("inserted filters: %v\n", filters)
+		fmt.Printf("inserted filters: %s\n", filters)
 		return getFiltersFinishState, err
 	}
 
