@@ -53,7 +53,7 @@ func findAndDeleteRecordByID(id int64, storage *inmemory.Storage) error {
 }
 
 func confirmAndDeleteByID(record *data.Record, storage *inmemory.Storage) error {
-	confirmed, err := statemachines.Confirm(record)
+	confirmed, err := statemachines.Confirm(record, utils.CommandDelete)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandDelete, err)
 	}
