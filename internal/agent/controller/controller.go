@@ -32,6 +32,8 @@ loop:
 			commands.Delete(commandParts, c.inmemory)
 		case utils.CommandGet:
 			commands.Get(commandParts, c.inmemory)
+		case utils.CommandUpdate:
+			commands.Update(commandParts, c.inmemory)
 		case utils.CommandExit:
 			fmt.Printf("Exit from app\n")
 			break loop

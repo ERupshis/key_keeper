@@ -8,6 +8,7 @@ const (
 	CommandExit     = "exit"
 	CommandGet      = "get"
 	CommandSave     = "save"
+	CommandUpdate   = "update"
 
 	CommandFilters = "filters"
 	CommandID      = "id"

@@ -12,7 +12,12 @@ import (
 )
 
 func ProcessAddCommand(record *data.Record) error {
-	record.BankCard = &data.BankCard{}
+	record.BankCard = &data.BankCard{
+		Number:     "XXXX XXXX XXXX XXXX",
+		Expiration: "XX/XX",
+		CVV:        "XXX or XXXX",
+		Name:       "",
+	}
 	record.RecordType = data.TypeBankCard
 
 	cfg := statemachines.AddConfig{
@@ -49,7 +54,7 @@ func addMainData(record *data.Record) error {
 	for currentState != addFinishState {
 		switch currentState {
 		case addInitialState:
-			currentState = stateInitial()
+			currentState = stateInitial(record)
 		case addNumberState:
 			{
 				currentState, err = stateNumber(record)
@@ -84,8 +89,8 @@ func addMainData(record *data.Record) error {
 	return nil
 }
 
-func stateInitial() addState {
-	fmt.Printf("insert card number(XXXX XXXX XXXX XXXX): ")
+func stateInitial(record *data.Record) addState {
+	fmt.Printf("insert card number(%s): ", record.BankCard.Number)
 	return addNumberState
 }
 
@@ -101,7 +106,7 @@ func stateNumber(record *data.Record) (addState, error) {
 		return addNumberState, err
 	}
 
-	fmt.Print("insert card expiration (XX/XX): ")
+	fmt.Printf("insert card expiration (%s): ", record.BankCard.Expiration)
 	return addExpirationState, err
 
 }
@@ -117,7 +122,7 @@ func stateExpiration(record *data.Record) (addState, error) {
 		return addExpirationState, err
 	}
 
-	fmt.Printf("insert card CVV (XXX or XXXX): ")
+	fmt.Printf("insert card CVV (%s): ", record.BankCard.CVV)
 	return addCVVState, err
 }
 
@@ -133,7 +138,11 @@ func stateCVV(record *data.Record) (addState, error) {
 		return addCVVState, err
 	}
 
-	fmt.Printf("insert card holder name: ")
+	if record.BankCard.Name == "" {
+		fmt.Printf("insert card holder name: ")
+	} else {
+		fmt.Printf("insert card holder name(%s): ", record.BankCard.Name)
+	}
 	return addCardHolderState, err
 }
 

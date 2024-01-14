@@ -27,17 +27,25 @@ func DeepCopyRecord(record *Record) *Record {
 		res.MetaData[key] = val
 	}
 
-	tmpBankCard := *record.BankCard
-	res.BankCard = &tmpBankCard
+	if record.Credentials != nil {
+		tmpCredentials := *record.Credentials
+		res.Credentials = &tmpCredentials
+	}
 
-	tmpCredentials := *record.Credentials
-	res.Credentials = &tmpCredentials
+	if record.BankCard != nil {
+		tmpBankCard := *record.BankCard
+		res.BankCard = &tmpBankCard
+	}
 
-	tmpText := *record.Text
-	res.Text = &tmpText
+	if record.Text != nil {
+		tmpText := *record.Text
+		res.Text = &tmpText
+	}
 
-	tmpBinary := *record.Binary
-	res.Binary = &tmpBinary
+	if record.Binary != nil {
+		tmpBinary := *record.Binary
+		res.Binary = &tmpBinary
+	}
 
 	return &res
 }
