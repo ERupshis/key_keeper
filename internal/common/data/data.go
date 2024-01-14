@@ -1,5 +1,9 @@
 package data
 
+import (
+	"time"
+)
+
 const (
 	TypeUndefined   = RecordType(0)
 	TypeCredentials = RecordType(1)
@@ -50,4 +54,6 @@ type Record struct {
 	BankCard    *BankCard    `json:"bank_card,omitempty"`
 	Text        *Text        `json:"text,omitempty"`
 	Binary      *Binary      `json:"binary,omitempty"`
+	Deleted     bool         `json:"deleted"`
+	UpdatedAt   time.Time    `json:"updated_at"`
 }

@@ -17,9 +17,9 @@ func Get(parts []string, storage *inmemory.Storage) {
 		return
 	}
 
-	records, err := processGetCommand(data.ConvertStringToRecordType(parts[1]), storage)
+	records, err := handleGet(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		handleProcessError(err, utils.CommandGet, supportedTypes)
+		handleCommandError(err, utils.CommandGet, supportedTypes)
 		return
 	}
 
@@ -29,7 +29,7 @@ func Get(parts []string, storage *inmemory.Storage) {
 
 func writeGetResult(records []data.Record) {
 	if len(records) == 0 {
-		fmt.Printf("missing record with given id\n")
+		fmt.Printf("missing record(s)\n")
 	} else {
 		fmt.Printf("found '%d' records:\n", len(records))
 		for idx, record := range records {
@@ -38,7 +38,7 @@ func writeGetResult(records []data.Record) {
 	}
 }
 
-func processGetCommand(recordType data.RecordType, storage *inmemory.Storage) ([]data.Record, error) {
+func handleGet(recordType data.RecordType, storage *inmemory.Storage) ([]data.Record, error) {
 	if recordType == data.TypeUndefined {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrIncorrectRecordType)
 	}

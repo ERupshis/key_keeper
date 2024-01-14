@@ -28,6 +28,8 @@ loop:
 		switch strings.ToLower(commandParts[0]) {
 		case utils.CommandAdd:
 			commands.Add(commandParts, c.inmemory)
+		case utils.CommandDelete:
+			commands.Delete(commandParts, c.inmemory)
 		case utils.CommandGet:
 			commands.Get(commandParts, c.inmemory)
 		case utils.CommandExit:
@@ -48,7 +50,7 @@ func readCommand() ([]string, bool) {
 	command, _, _ := utils.GetUserInputAndValidate(nil)
 	command = strings.TrimSpace(command)
 	commandParts := strings.Split(command, " ")
-	if len(commandParts) == 0 {
+	if len(commandParts) == 0 || command == "" {
 		fmt.Printf("Empty command. Try again\n")
 		return nil, false
 	}

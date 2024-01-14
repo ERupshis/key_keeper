@@ -18,9 +18,9 @@ func Add(parts []string, storage *inmemory.Storage) {
 		return
 	}
 
-	record, err := processAddCommand(data.ConvertStringToRecordType(parts[1]), storage)
+	record, err := handleAdd(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		handleProcessError(err, utils.CommandAdd, supportedTypes)
+		handleCommandError(err, utils.CommandAdd, supportedTypes)
 		return
 	}
 
@@ -28,19 +28,20 @@ func Add(parts []string, storage *inmemory.Storage) {
 	return
 }
 
-func handleProcessError(err error, command string, supportedTypes []string) {
+func handleCommandError(err error, command string, supportedTypes []string) {
 	if errors.Is(err, errs.ErrInterruptedByUser) {
 		fmt.Printf("'%s' command was canceled by user\n", command)
 		return
 	}
 
-	fmt.Printf("request parsing error: %v\n", err)
+	fmt.Printf("request parsing error: %v", err)
 	if errors.Is(err, errs.ErrIncorrectRecordType) {
-		fmt.Printf("only (%v) are supported\n", supportedTypes)
+		fmt.Printf(". only (%v) are supported", supportedTypes)
 	}
+	fmt.Printf("\n")
 }
 
-func processAddCommand(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
+func handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
 	newRecord := &data.Record{
 		Id: -1,
 	}

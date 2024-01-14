@@ -85,7 +85,7 @@ func addMainData(record *data.Record) error {
 }
 
 func stateInitial() addState {
-	fmt.Print("insert card number(XXXX XXXX XXXX XXXX): ")
+	fmt.Printf("insert card number(XXXX XXXX XXXX XXXX): ")
 	return addNumberState
 }
 
@@ -117,7 +117,7 @@ func stateExpiration(record *data.Record) (addState, error) {
 		return addExpirationState, err
 	}
 
-	fmt.Print("insert card CVV (XXX or XXXX): ")
+	fmt.Printf("insert card CVV (XXX or XXXX): ")
 	return addCVVState, err
 }
 
@@ -133,7 +133,7 @@ func stateCVV(record *data.Record) (addState, error) {
 		return addCVVState, err
 	}
 
-	fmt.Print("insert card holder name: ")
+	fmt.Printf("insert card holder name: ")
 	return addCardHolderState, err
 }
 

@@ -11,12 +11,12 @@ import (
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-type state int
+type stateAdd int
 
 const (
-	addInitialState  = state(0)
-	addMainDataState = state(1)
-	addFinishState   = state(2)
+	addInitialState  = stateAdd(0)
+	addMainDataState = stateAdd(1)
+	addFinishState   = stateAdd(2)
 )
 
 type AddConfig struct {
@@ -58,11 +58,12 @@ func Add(cfg AddConfig) error {
 }
 
 // MAIN DATA STATE MACHINE.
+type stateAddMeta int
 
 const (
-	addMetaInitialState = state(0)
-	addMetaDataState    = state(1)
-	addMetaFinishState  = state(2)
+	addMetaInitialState = stateAddMeta(0)
+	addMetaDataState    = stateAddMeta(1)
+	addMetaFinishState  = stateAddMeta(2)
 )
 
 var (
@@ -90,7 +91,7 @@ func addMetaData(record *data.Record) error {
 	return nil
 }
 
-func stateMetaInitial() state {
+func stateMetaInitial() stateAddMeta {
 	fmt.Printf(
 		"insert meta data(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
@@ -100,7 +101,7 @@ func stateMetaInitial() state {
 	return addMetaDataState
 }
 
-func stateMetaData(record *data.Record) (state, error) {
+func stateMetaData(record *data.Record) (stateAddMeta, error) {
 	metaData, ok, err := utils.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {

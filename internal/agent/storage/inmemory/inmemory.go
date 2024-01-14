@@ -1,6 +1,8 @@
 package inmemory
 
 import (
+	"time"
+
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
@@ -14,12 +16,28 @@ func NewStorage() *Storage {
 }
 
 func (s *Storage) AddRecord(record *data.Record) error {
+	record.UpdatedAt = time.Now()
 	s.records = append(s.records, *record)
 	return nil
 }
 
-func (s *Storage) AddRecords(record []data.Record) error {
-	s.records = append(s.records, record...)
+func (s *Storage) AddRecords(records []data.Record) error {
+	for idx := range records {
+		records[idx].UpdatedAt = time.Now()
+	}
+
+	s.records = append(s.records, records...)
+	return nil
+}
+
+func (s *Storage) DeleteRecord(id int64) error {
+	for idx, rec := range s.records {
+		if rec.Id == id {
+			s.records = append(s.records[:idx], s.records[idx+1:]...)
+			return nil
+		}
+	}
+
 	return nil
 }
 
@@ -63,6 +81,8 @@ func isRecordMatchToFilters(record *data.Record, filters map[string]string) bool
 			if !match {
 				break
 			}
+
+			continue
 		}
 
 		if metaValue, ok := record.MetaData[key]; !ok || val != metaValue {
