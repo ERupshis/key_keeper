@@ -4,44 +4,43 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func Add(parts []string, storage *inmemory.Storage) {
+func (c *Commands) Add(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
-		fmt.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandAdd, supportedTypes)
+		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandAdd, supportedTypes)
 		return
 	}
 
-	record, err := handleAdd(data.ConvertStringToRecordType(parts[1]), storage)
+	record, err := c.handleAdd(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		handleCommandError(err, utils.CommandAdd, supportedTypes)
+		c.handleCommandError(err, utils.CommandAdd, supportedTypes)
 		return
 	}
 
-	fmt.Printf("record added: %s\n", record)
+	c.iactr.Printf("record added: %s\n", record)
 	return
 }
 
-func handleCommandError(err error, command string, supportedTypes []string) {
+func (c *Commands) handleCommandError(err error, command string, supportedTypes []string) {
 	if errors.Is(err, errs.ErrInterruptedByUser) {
-		fmt.Printf("'%s' command was canceled by user\n", command)
+		c.iactr.Printf("'%s' command was canceled by user\n", command)
 		return
 	}
 
-	fmt.Printf("request parsing error: %v", err)
+	c.iactr.Printf("request parsing error: %v", err)
 	if errors.Is(err, errs.ErrIncorrectRecordType) {
-		fmt.Printf(". only (%s) are supported", supportedTypes)
+		c.iactr.Printf(". only (%s) are supported", supportedTypes)
 	}
-	fmt.Printf("\n")
+	c.iactr.Printf("\n")
 }
 
-func handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
+func (c *Commands) handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
 	newRecord := &data.Record{
 		ID: -1,
 	}
@@ -49,7 +48,7 @@ func handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Rec
 	var err error
 	switch recordType {
 	case data.TypeBankCard:
-		err = bankcard.ProcessAddCommand(newRecord)
+		err = c.bc.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
 	}

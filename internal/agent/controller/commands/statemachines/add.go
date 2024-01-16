@@ -24,7 +24,7 @@ type AddConfig struct {
 	MainData func(record *data.Record) error
 }
 
-func Add(cfg AddConfig) error {
+func (s *StateMachines) Add(cfg AddConfig) error {
 	currentState := addInitialState
 
 	for currentState != addFinishState {
@@ -42,7 +42,7 @@ func Add(cfg AddConfig) error {
 			}
 		case addMainDataState:
 			{
-				if err := addMetaData(cfg.Record); err != nil {
+				if err := s.addMetaData(cfg.Record); err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return err
 					} else {
@@ -70,17 +70,17 @@ var (
 	regexMetaData = regexp.MustCompile(`^(?:[a-zA-Z0-9]+ : .+|save)$`)
 )
 
-func addMetaData(record *data.Record) error {
+func (s *StateMachines) addMetaData(record *data.Record) error {
 	currentState := addMetaInitialState
 
 	var err error
 	for currentState != addMetaFinishState {
 		switch currentState {
 		case addMetaInitialState:
-			currentState = stateMetaInitial()
+			currentState = s.stateMetaInitial()
 		case addMetaDataState:
 			{
-				currentState, err = stateMetaData(record)
+				currentState, err = s.stateMetaData(record)
 				if err != nil {
 					return err
 				}
@@ -91,7 +91,7 @@ func addMetaData(record *data.Record) error {
 	return nil
 }
 
-func stateMetaInitial() stateAddMeta {
+func (s *StateMachines) stateMetaInitial() stateAddMeta {
 	fmt.Printf(
 		"insert meta data(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
@@ -101,8 +101,8 @@ func stateMetaInitial() stateAddMeta {
 	return addMetaDataState
 }
 
-func stateMetaData(record *data.Record) (stateAddMeta, error) {
-	metaData, ok, err := utils.GetUserInputAndValidate(regexMetaData)
+func (s *StateMachines) stateMetaData(record *data.Record) (stateAddMeta, error) {
+	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
 		fmt.Printf("inserted metadata: %s\n", record.MetaData)

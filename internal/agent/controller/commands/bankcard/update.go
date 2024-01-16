@@ -5,11 +5,11 @@ import (
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func ProcessUpdateCommand(record *data.Record) error {
+func (b *BankCard) ProcessUpdateCommand(record *data.Record) error {
 	cfg := statemachines.AddConfig{
 		Record:   record,
-		MainData: addMainData,
+		MainData: b.addMainData,
 	}
 
-	return statemachines.Add(cfg)
+	return b.sm.Add(cfg)
 }

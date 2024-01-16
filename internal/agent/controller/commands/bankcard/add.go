@@ -2,16 +2,14 @@ package bankcard
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func ProcessAddCommand(record *data.Record) error {
+func (b *BankCard) ProcessAddCommand(record *data.Record) error {
 	record.BankCard = &data.BankCard{
 		Number:     "XXXX XXXX XXXX XXXX",
 		Expiration: "XX/XX",
@@ -22,10 +20,10 @@ func ProcessAddCommand(record *data.Record) error {
 
 	cfg := statemachines.AddConfig{
 		Record:   record,
-		MainData: addMainData,
+		MainData: b.addMainData,
 	}
 
-	return statemachines.Add(cfg)
+	return b.sm.Add(cfg)
 }
 
 // MAIN DATA STATE MACHINE.
@@ -47,38 +45,38 @@ var (
 	regexCardHolder     = regexp.MustCompile(`^\D+$`)
 )
 
-func addMainData(record *data.Record) error {
+func (b *BankCard) addMainData(record *data.Record) error {
 	currentState := addInitialState
 
 	var err error
 	for currentState != addFinishState {
 		switch currentState {
 		case addInitialState:
-			currentState = stateInitial(record)
+			currentState = b.stateInitial(record)
 		case addNumberState:
 			{
-				currentState, err = stateNumber(record)
+				currentState, err = b.stateNumber(record)
 				if err != nil {
 					return err
 				}
 			}
 		case addExpirationState:
 			{
-				currentState, err = stateExpiration(record)
+				currentState, err = b.stateExpiration(record)
 				if err != nil {
 					return err
 				}
 			}
 		case addCVVState:
 			{
-				currentState, err = stateCVV(record)
+				currentState, err = b.stateCVV(record)
 				if err != nil {
 					return err
 				}
 			}
 		case addCardHolderState:
 			{
-				currentState, err = stateCardHolder(record)
+				currentState, err = b.stateCardHolder(record)
 				if err != nil {
 					return err
 				}
@@ -89,13 +87,13 @@ func addMainData(record *data.Record) error {
 	return nil
 }
 
-func stateInitial(record *data.Record) addState {
-	fmt.Printf("insert card number(%s): ", record.BankCard.Number)
+func (b *BankCard) stateInitial(record *data.Record) addState {
+	b.iactr.Printf("insert card number(%s): ", record.BankCard.Number)
 	return addNumberState
 }
 
-func stateNumber(record *data.Record) (addState, error) {
-	cardNumber, ok, err := utils.GetUserInputAndValidate(regexNumber)
+func (b *BankCard) stateNumber(record *data.Record) (addState, error) {
+	cardNumber, ok, err := b.iactr.GetUserInputAndValidate(regexNumber)
 	record.BankCard.Number = cardNumber
 
 	if !ok {
@@ -106,13 +104,13 @@ func stateNumber(record *data.Record) (addState, error) {
 		return addNumberState, err
 	}
 
-	fmt.Printf("insert card expiration (%s): ", record.BankCard.Expiration)
+	b.iactr.Printf("insert card expiration (%s): ", record.BankCard.Expiration)
 	return addExpirationState, err
 
 }
 
-func stateExpiration(record *data.Record) (addState, error) {
-	cardExpiration, ok, err := utils.GetUserInputAndValidate(regexExpirationDate)
+func (b *BankCard) stateExpiration(record *data.Record) (addState, error) {
+	cardExpiration, ok, err := b.iactr.GetUserInputAndValidate(regexExpirationDate)
 	record.BankCard.Expiration = cardExpiration
 	if !ok {
 		return addExpirationState, err
@@ -122,12 +120,12 @@ func stateExpiration(record *data.Record) (addState, error) {
 		return addExpirationState, err
 	}
 
-	fmt.Printf("insert card CVV (%s): ", record.BankCard.CVV)
+	b.iactr.Printf("insert card CVV (%s): ", record.BankCard.CVV)
 	return addCVVState, err
 }
 
-func stateCVV(record *data.Record) (addState, error) {
-	cardCVV, ok, err := utils.GetUserInputAndValidate(regexCVV)
+func (b *BankCard) stateCVV(record *data.Record) (addState, error) {
+	cardCVV, ok, err := b.iactr.GetUserInputAndValidate(regexCVV)
 	record.BankCard.CVV = cardCVV
 
 	if !ok {
@@ -139,15 +137,15 @@ func stateCVV(record *data.Record) (addState, error) {
 	}
 
 	if record.BankCard.Name == "" {
-		fmt.Printf("insert card holder name: ")
+		b.iactr.Printf("insert card holder name: ")
 	} else {
-		fmt.Printf("insert card holder name(%s): ", record.BankCard.Name)
+		b.iactr.Printf("insert card holder name(%s): ", record.BankCard.Name)
 	}
 	return addCardHolderState, err
 }
 
-func stateCardHolder(record *data.Record) (addState, error) {
-	cardHolder, ok, err := utils.GetUserInputAndValidate(regexCardHolder)
+func (b *BankCard) stateCardHolder(record *data.Record) (addState, error) {
+	cardHolder, ok, err := b.iactr.GetUserInputAndValidate(regexCardHolder)
 	record.BankCard.Name = cardHolder
 
 	if !ok {
@@ -158,6 +156,6 @@ func stateCardHolder(record *data.Record) (addState, error) {
 		return addCardHolderState, err
 	}
 
-	fmt.Printf("inserted card data: %+v\n", *record.BankCard)
+	b.iactr.Printf("inserted card data: %+v\n", *record.BankCard)
 	return addFinishState, err
 }

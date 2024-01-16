@@ -3,31 +3,29 @@ package commands
 import (
 	"fmt"
 
-	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
-	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func Update(parts []string, storage *inmemory.Storage) {
+func (c *Commands) Update(parts []string, storage *inmemory.Storage) {
 	if len(parts) != 1 {
-		fmt.Printf("incorrect request. should contain command '%s' only\n", utils.CommandUpdate)
+		c.iactr.Printf("incorrect request. should contain command '%s' only\n", utils.CommandUpdate)
 		return
 	}
 
-	err := handleUpdate(storage)
+	err := c.handleUpdate(storage)
 	if err != nil {
-		handleCommandError(err, utils.CommandUpdate, nil)
+		c.handleCommandError(err, utils.CommandUpdate, nil)
 		return
 	}
 
 	return
 }
 
-func handleUpdate(storage *inmemory.Storage) error {
-	id, err := statemachines.Delete()
+func (c *Commands) handleUpdate(storage *inmemory.Storage) error {
+	id, err := c.sm.Delete()
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 	}
@@ -36,11 +34,11 @@ func handleUpdate(storage *inmemory.Storage) error {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, errs.ErrUnexpected)
 	}
 
-	return findAndUpdateRecordByID(*id, storage)
+	return c.findAndUpdateRecordByID(*id, storage)
 }
 
-func findAndUpdateRecordByID(id int64, storage *inmemory.Storage) error {
-	records, err := getRecordByID(id, storage)
+func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) error {
+	records, err := c.getRecordByID(id, storage)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandDelete, err)
 	}
@@ -54,7 +52,7 @@ func findAndUpdateRecordByID(id int64, storage *inmemory.Storage) error {
 	tmpRecord.MetaData = make(data.MetaData)
 	switch records[0].RecordType {
 	case data.TypeBankCard:
-		err = bankcard.ProcessUpdateCommand(tmpRecord)
+		err = c.bc.ProcessUpdateCommand(tmpRecord)
 	default:
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, errs.ErrIncorrectRecordType)
 	}
@@ -63,11 +61,11 @@ func findAndUpdateRecordByID(id int64, storage *inmemory.Storage) error {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 	}
 
-	return confirmAndUpdateRecordByID(tmpRecord, storage)
+	return c.confirmAndUpdateRecordByID(tmpRecord, storage)
 }
 
-func confirmAndUpdateRecordByID(record *data.Record, storage *inmemory.Storage) error {
-	confirmed, err := statemachines.Confirm(record, utils.CommandUpdate)
+func (c *Commands) confirmAndUpdateRecordByID(record *data.Record, storage *inmemory.Storage) error {
+	confirmed, err := c.sm.Confirm(record, utils.CommandUpdate)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 	}
@@ -76,9 +74,9 @@ func confirmAndUpdateRecordByID(record *data.Record, storage *inmemory.Storage) 
 		if err = storage.UpdateRecord(record); err != nil {
 			return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 		}
-		fmt.Printf("Record sucessfully updated\n")
+		c.iactr.Printf("Record sucessfully updated\n")
 	} else {
-		fmt.Printf("Record updating was interrupted by user\n")
+		c.iactr.Printf("Record updating was interrupted by user\n")
 	}
 
 	return nil

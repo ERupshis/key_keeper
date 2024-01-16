@@ -20,7 +20,7 @@ const (
 	getFinishState     = stateGet(3)
 )
 
-func Get() (*int64, map[string]string, error) {
+func (s *StateMachines) Get() (*int64, map[string]string, error) {
 	currentState := getInitialState
 
 	var id *int64
@@ -29,7 +29,7 @@ func Get() (*int64, map[string]string, error) {
 		switch currentState {
 		case getInitialState:
 			{
-				method, err := getMethod()
+				method, err := s.getMethod()
 				if err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return nil, nil, err
@@ -38,11 +38,11 @@ func Get() (*int64, map[string]string, error) {
 					}
 				}
 
-				currentState = getStateAccordingMethod(method)
+				currentState = s.getStateAccordingMethod(method)
 			}
 		case getSearchByID:
 			{
-				idTmp, err := getID()
+				idTmp, err := s.getID()
 				if err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return nil, nil, err
@@ -56,7 +56,7 @@ func Get() (*int64, map[string]string, error) {
 			}
 		case getSearchByFilters:
 			{
-				filtersTmp, err := getFilters()
+				filtersTmp, err := s.getFilters()
 				if err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return nil, nil, err
@@ -74,7 +74,7 @@ func Get() (*int64, map[string]string, error) {
 	return id, filters, nil
 }
 
-func getStateAccordingMethod(method string) stateGet {
+func (s *StateMachines) getStateAccordingMethod(method string) stateGet {
 	switch method {
 	case utils.CommandID:
 		return getSearchByID
@@ -99,7 +99,7 @@ var (
 	regexGetMethodData = regexp.MustCompile(`^(id|filters)$`)
 )
 
-func getMethod() (string, error) {
+func (s *StateMachines) getMethod() (string, error) {
 	currentState := getMethodInitialState
 
 	var method string
@@ -107,10 +107,10 @@ func getMethod() (string, error) {
 	for currentState != getMethodFinishState {
 		switch currentState {
 		case getMethodInitialState:
-			currentState = stateGetMethodInitial()
+			currentState = s.stateGetMethodInitial()
 		case getMethodSelectionState:
 			{
-				currentState, method, err = stateGetMethodData()
+				currentState, method, err = s.stateGetMethodData()
 				if err != nil {
 					return "", err
 				}
@@ -121,13 +121,13 @@ func getMethod() (string, error) {
 	return method, nil
 }
 
-func stateGetMethodInitial() stateGetMethod {
+func (s *StateMachines) stateGetMethodInitial() stateGetMethod {
 	fmt.Printf("insert search method('%s' or '%s'): ", utils.CommandID, utils.CommandFilters)
 	return getMethodSelectionState
 }
 
-func stateGetMethodData() (stateGetMethod, string, error) {
-	method, ok, err := utils.GetUserInputAndValidate(regexGetMethodData)
+func (s *StateMachines) stateGetMethodData() (stateGetMethod, string, error) {
+	method, ok, err := s.iactr.GetUserInputAndValidate(regexGetMethodData)
 
 	if !ok {
 		return getMethodSelectionState, "", err
@@ -153,7 +153,7 @@ var (
 	regexGetID = regexp.MustCompile(`^-?\d{1,10}$`)
 )
 
-func getID() (int64, error) {
+func (s *StateMachines) getID() (int64, error) {
 	currentState := getIDInitialState
 
 	var id int64
@@ -161,10 +161,10 @@ func getID() (int64, error) {
 	for currentState != getIDFinishState {
 		switch currentState {
 		case getIDInitialState:
-			currentState = stateGetIDInitial()
+			currentState = s.stateGetIDInitial()
 		case getIDValueState:
 			{
-				currentState, id, err = stateGetIDValue()
+				currentState, id, err = s.stateGetIDValue()
 				if err != nil {
 					return 0, err
 				}
@@ -175,13 +175,13 @@ func getID() (int64, error) {
 	return id, nil
 }
 
-func stateGetIDInitial() stateGetID {
+func (s *StateMachines) stateGetIDInitial() stateGetID {
 	fmt.Printf("insert record %s: ", utils.CommandID)
 	return getIDValueState
 }
 
-func stateGetIDValue() (stateGetID, int64, error) {
-	idStr, ok, err := utils.GetUserInputAndValidate(regexGetID)
+func (s *StateMachines) stateGetIDValue() (stateGetID, int64, error) {
+	idStr, ok, err := s.iactr.GetUserInputAndValidate(regexGetID)
 
 	if !ok {
 		return getIDValueState, 0, err
@@ -212,7 +212,7 @@ var (
 	regexGetFilters = regexp.MustCompile(`^(?:[a-zA-Z0-9]+ : .+|continue)$`)
 )
 
-func getFilters() (map[string]string, error) {
+func (s *StateMachines) getFilters() (map[string]string, error) {
 	currentState := getFiltersInitialState
 
 	filters := make(map[string]string)
@@ -220,10 +220,10 @@ func getFilters() (map[string]string, error) {
 	for currentState != getFiltersFinishState {
 		switch currentState {
 		case getFiltersInitialState:
-			currentState = stateGetFiltersInitial()
+			currentState = s.stateGetFiltersInitial()
 		case getFiltersValueState:
 			{
-				currentState, err = stateGetFiltersValue(filters)
+				currentState, err = s.stateGetFiltersValue(filters)
 				if err != nil {
 					return nil, err
 				}
@@ -234,7 +234,7 @@ func getFilters() (map[string]string, error) {
 	return filters, nil
 }
 
-func stateGetFiltersInitial() stateGetFilters {
+func (s *StateMachines) stateGetFiltersInitial() stateGetFilters {
 	fmt.Printf(
 		"insert filters through meta data(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
@@ -244,8 +244,8 @@ func stateGetFiltersInitial() stateGetFilters {
 	return getFiltersValueState
 }
 
-func stateGetFiltersValue(filters map[string]string) (stateGetFilters, error) {
-	metaData, ok, err := utils.GetUserInputAndValidate(regexGetFilters)
+func (s *StateMachines) stateGetFiltersValue(filters map[string]string) (stateGetFilters, error) {
+	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexGetFilters)
 
 	if metaData == utils.CommandContinue {
 		fmt.Printf("inserted filters: %s\n", filters)

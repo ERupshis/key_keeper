@@ -17,7 +17,7 @@ const (
 	deleteFinishState  = stateDelete(2)
 )
 
-func Delete() (*int64, error) {
+func (s *StateMachines) Delete() (*int64, error) {
 	currentState := deleteInitialState
 
 	var id *int64
@@ -25,11 +25,11 @@ func Delete() (*int64, error) {
 		switch currentState {
 		case deleteInitialState:
 			{
-				currentState = stateDeleteIDInitial()
+				currentState = s.stateDeleteIDInitial()
 			}
 		case deleteIDState:
 			{
-				currentStateTmp, idTmp, err := stateDeleteIDValue()
+				currentStateTmp, idTmp, err := s.stateDeleteIDValue()
 				if err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return nil, err
@@ -47,13 +47,13 @@ func Delete() (*int64, error) {
 	return id, nil
 }
 
-func stateDeleteIDInitial() stateDelete {
+func (s *StateMachines) stateDeleteIDInitial() stateDelete {
 	fmt.Printf("insert record %s: ", utils.CommandID)
 	return deleteIDState
 }
 
-func stateDeleteIDValue() (stateDelete, int64, error) {
-	idStr, ok, err := utils.GetUserInputAndValidate(regexGetID)
+func (s *StateMachines) stateDeleteIDValue() (stateDelete, int64, error) {
+	idStr, ok, err := s.iactr.GetUserInputAndValidate(regexGetID)
 
 	if !ok {
 		return deleteIDState, 0, err

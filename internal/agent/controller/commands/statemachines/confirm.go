@@ -22,7 +22,7 @@ var (
 	regexConfirmApprove = regexp.MustCompile(`^(yes|no)$`)
 )
 
-func Confirm(record *data.Record, command string) (bool, error) {
+func (s *StateMachines) Confirm(record *data.Record, command string) (bool, error) {
 	currentState := confirmInitialState
 
 	var confirmed bool
@@ -30,11 +30,11 @@ func Confirm(record *data.Record, command string) (bool, error) {
 		switch currentState {
 		case confirmInitialState:
 			{
-				currentState = stateConfirmInitial(record, command)
+				currentState = s.stateConfirmInitial(record, command)
 			}
 		case confirmApproveState:
 			{
-				currentStateTmp, approve, err := stateConfirmApprove()
+				currentStateTmp, approve, err := s.stateConfirmApprove()
 				if err != nil {
 					if errors.Is(err, errs.ErrInterruptedByUser) {
 						return false, err
@@ -52,7 +52,7 @@ func Confirm(record *data.Record, command string) (bool, error) {
 	return confirmed, nil
 }
 
-func stateConfirmInitial(record *data.Record, command string) stateConfirm {
+func (s *StateMachines) stateConfirmInitial(record *data.Record, command string) stateConfirm {
 	switch command {
 	case utils.CommandDelete:
 		fmt.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
@@ -65,8 +65,8 @@ func stateConfirmInitial(record *data.Record, command string) stateConfirm {
 	return confirmApproveState
 }
 
-func stateConfirmApprove() (stateConfirm, bool, error) {
-	approve, ok, err := utils.GetUserInputAndValidate(regexConfirmApprove)
+func (s *StateMachines) stateConfirmApprove() (stateConfirm, bool, error) {
+	approve, ok, err := s.iactr.GetUserInputAndValidate(regexConfirmApprove)
 
 	if !ok {
 		return confirmApproveState, false, err

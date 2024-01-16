@@ -2,72 +2,70 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"text/tabwriter"
 
-	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
-func Get(parts []string, storage *inmemory.Storage) {
+func (c *Commands) Get(parts []string, storage *inmemory.Storage) {
 	supportedTypes := []string{data.StrAny, data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
 	if len(parts) != 2 {
-		fmt.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandGet, supportedTypes)
+		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandGet, supportedTypes)
 		return
 	}
 
-	records, err := handleGet(data.ConvertStringToRecordType(parts[1]), storage)
+	records, err := c.handleGet(data.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
-		handleCommandError(err, utils.CommandGet, supportedTypes)
+		c.handleCommandError(err, utils.CommandGet, supportedTypes)
 		return
 	}
 
-	writeGetResult(records)
+	c.writeGetResult(records)
 	return
 }
 
-func writeGetResult(records []data.Record) {
+func (c *Commands) writeGetResult(records []data.Record) {
 	if len(records) == 0 {
-		fmt.Printf("missing record(s)\n")
+		c.iactr.Printf("missing record(s)\n")
 	} else {
-		fmt.Printf("found '%d' records:\n", len(records))
-		fmt.Printf("-----\n")
+		c.iactr.Printf("found '%d' records:\n", len(records))
+		c.iactr.Printf("-----\n")
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		w := tabwriter.NewWriter(c.iactr.Writer(), 0, 0, 2, ' ', 0)
 		for idx, record := range records {
 			_, _ = fmt.Fprintf(w, fmt.Sprintf("   %d.%s\n", idx, record.TabString()))
 		}
 		_ = w.Flush()
 
-		fmt.Printf("-----\n")
+		c.iactr.Printf("-----\n")
 	}
 }
 
-func handleGet(recordType data.RecordType, storage *inmemory.Storage) ([]data.Record, error) {
+func (c *Commands) handleGet(recordType data.RecordType, storage *inmemory.Storage) ([]data.Record, error) {
 	if recordType == data.TypeUndefined {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrIncorrectRecordType)
 	}
 
-	id, filters, err := statemachines.Get()
+	id, filters, err := c.sm.Get()
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
 	}
 
 	if id != nil {
-		return getRecordByID(*id, storage)
+		return c.getRecordByID(*id, storage)
 	}
 
 	if filters != nil {
-		return getRecordByFilters(recordType, filters, storage)
+		return c.getRecordByFilters(recordType, filters, storage)
 	}
 
 	return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrUnexpected)
 }
 
-func getRecordByID(id int64, storage *inmemory.Storage) ([]data.Record, error) {
+func (c *Commands) getRecordByID(id int64, storage *inmemory.Storage) ([]data.Record, error) {
 	record, err := storage.GetRecord(id)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
@@ -80,7 +78,7 @@ func getRecordByID(id int64, storage *inmemory.Storage) ([]data.Record, error) {
 	return []data.Record{*record}, nil
 }
 
-func getRecordByFilters(recordType data.RecordType, filters map[string]string, storage *inmemory.Storage) ([]data.Record, error) {
+func (c *Commands) getRecordByFilters(recordType data.RecordType, filters map[string]string, storage *inmemory.Storage) ([]data.Record, error) {
 	records, err := storage.GetRecords(recordType, filters)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
