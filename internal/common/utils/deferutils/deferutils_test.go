@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"gitlab.simbirsoft/verify/e.rupshis/internal/common/logs"
+	"github.com/erupshis/key_keeper/internal/common/logger"
 )
 
 func TestExecuteWithLogError(t *testing.T) {
-	log := logs.CreateMock()
-
 	type args struct {
 		callback func() error
-		log      logs.BaseLogs
+		log      logger.BaseLogger
 	}
 	tests := []struct {
 		name string
@@ -24,7 +22,7 @@ func TestExecuteWithLogError(t *testing.T) {
 				callback: func() error {
 					return nil
 				},
-				log: log,
+				log: logger.CreateMock(),
 			},
 		},
 		{
@@ -33,7 +31,7 @@ func TestExecuteWithLogError(t *testing.T) {
 				callback: func() error {
 					return fmt.Errorf("test err")
 				},
-				log: log,
+				log: logger.CreateMock(),
 			},
 		},
 	}
