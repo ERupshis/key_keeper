@@ -6,25 +6,40 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/common/data"
 	"github.com/erupshis/key_keeper/internal/common/logger"
+	"github.com/erupshis/key_keeper/internal/common/ticker"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 )
 
+// AutoSaveConfig auto save settings.
+type AutoSaveConfig struct {
+	SaveInterval    time.Duration
+	InMemoryStorage *inmemory.Storage
+	Logs            logger.BaseLogger
+}
+
 // FileManager provides functionality to manage user data locally in the file.
 type FileManager struct {
-	path    string
+	path       string
+	passPhrase string
+
 	logs    logger.BaseLogger
 	writer  *fileWriter
 	scanner *fileScanner
+
+	autoSaveCfg *AutoSaveConfig
 }
 
 // NewFileManager creates a new instance of FileManager with the specified data path and logger.
-func NewFileManager(dataPath string, logger logger.BaseLogger) *FileManager {
+func NewFileManager(dataPath string, logger logger.BaseLogger, autoSaveCfg *AutoSaveConfig) *FileManager {
 	return &FileManager{
-		path: dataPath,
-		logs: logger,
+		path:        dataPath,
+		logs:        logger,
+		autoSaveCfg: autoSaveCfg,
 	}
 }
 
@@ -34,12 +49,12 @@ func (fm *FileManager) Close() error {
 }
 
 // CheckConnection checks the file connection status and always returns true for FileManager.
-func (fm *FileManager) CheckConnection(_ context.Context) (bool, error) {
+func (fm *FileManager) CheckConnection(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
 // SaveUserData saves user data in the file.
-func (fm *FileManager) SaveUserData(_ context.Context, records []data.Record) error {
+func (fm *FileManager) SaveUserData(ctx context.Context, records []data.Record) error {
 	if !fm.IsFileOpen() {
 		if err := fm.OpenFile(fm.path, true); err != nil {
 			return fmt.Errorf("cannot open file '%s' to save user data: %w", fm.path, err)
@@ -49,13 +64,18 @@ func (fm *FileManager) SaveUserData(_ context.Context, records []data.Record) er
 
 	var errs []error
 	for _, record := range records {
-		errs = append(errs, fm.WriteRecord(&record))
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("save user data locally interrupted: %w", ctx.Err())
+		default:
+			errs = append(errs, fm.WriteRecord(&record))
+		}
 	}
 	return errors.Join(errs...)
 }
 
 // RestoreUserData reads user data from the file and restores it.
-func (fm *FileManager) RestoreUserData(_ context.Context) ([]data.Record, error) {
+func (fm *FileManager) RestoreUserData(ctx context.Context, passPhrase string) ([]data.Record, error) {
 	if !fm.IsFileOpen() {
 		if err := fm.OpenFile(fm.path, false); err != nil {
 			return nil, fmt.Errorf("cannot open file '%s' to read user data: %w", fm.path, err)
@@ -63,24 +83,37 @@ func (fm *FileManager) RestoreUserData(_ context.Context) ([]data.Record, error)
 		defer deferutils.ExecWithLogError(fm.CloseFile, fm.logs)
 	}
 
+	// TODO: try to decode or create new file.
+	if passPhrase == "wrong" {
+		return nil, ErrIncorrectPassPhrase
+	}
+
 	var res []data.Record
 	record, err := fm.ScanRecord()
 	for record != nil {
-		if err != nil {
-			fm.logs.Infof("failed to scan record from file '%s'", fm.path)
-		} else {
-			res = append(res, *record)
-		}
 
-		record, err = fm.ScanRecord()
+		fm.handleScannedRecord(record, err, &res)
 	}
 
+	fm.RunAutoSave(ctx)
 	return res, nil
 }
 
 // IsFileOpen checks if the file is open.
 func (fm *FileManager) IsFileOpen() bool {
 	return fm.writer != nil && fm.scanner != nil
+}
+
+func (fm *FileManager) IsFileExist() (bool, error) {
+	_, err := os.Stat(fm.path)
+
+	if err == nil {
+		return true, nil
+	} else if os.IsNotExist(err) {
+		return false, nil
+	} else {
+		return false, fmt.Errorf("check local storage file existense: %w", err)
+	}
 }
 
 // OpenFile opens or creates a file for writing or reading metrics.
@@ -117,4 +150,37 @@ func (fm *FileManager) CloseFile() error {
 	fm.scanner = nil
 
 	return errors.Join(errs...)
+}
+
+func (fm *FileManager) Path() string {
+	return fm.path
+}
+
+func (fm *FileManager) SetPassPhrase(newPassPhrase string) string {
+	return fm.passPhrase
+}
+
+func (fm *FileManager) SetPath(newPath string) {
+	fm.path = newPath
+}
+
+func (fm *FileManager) RunAutoSave(ctx context.Context) {
+	storeTicker := time.NewTicker(fm.autoSaveCfg.SaveInterval)
+	go ticker.Run(storeTicker, ctx, func() {
+		select {
+		case <-ctx.Done():
+			storeTicker.Stop()
+			return
+		default:
+			records, err := fm.autoSaveCfg.InMemoryStorage.GetAllRecords()
+			if err != nil {
+				fm.autoSaveCfg.Logs.Infof("failed to extract inmemory data, error: %v", err)
+			}
+
+			if err = fm.SaveUserData(ctx, records); err != nil {
+				fm.autoSaveCfg.Logs.Infof("failed to save data in local storage, error: %v", err)
+			}
+		}
+
+	})
 }

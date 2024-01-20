@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/erupshis/key_keeper/internal/agent/config"
 	"github.com/erupshis/key_keeper/internal/agent/controller"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
+	localCmd "github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
+	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 )
@@ -25,17 +29,17 @@ func main() {
 	// example of run: go run -ldflags "-X main.buildVersion=v1.0.1 -X 'main.buildDate=$(cmd.exe /c "echo %DATE%")' -X 'main.buildCommit=$(git rev-parse HEAD)'" main.go
 	fmt.Printf("Build version: %s\nBuild date: %s\nBuild commit: %s\n", buildVersion, buildDate, buildCommit)
 
-	// cfg, err := config.Parse()
-	// if err != nil {
-	// 	log.Fatalf("error parse config: %v", err)
-	// 	return
-	// }
-
-	logger, err := logger.NewZap("info")
+	cfg, err := config.Parse()
 	if err != nil {
-		log.Fatalf("create zap logger: %v", err)
+		log.Fatalf("error parse config: %v", err)
+		return
 	}
-	defer deferutils.ExecSilent(logger.Sync)
+
+	logs, err := logger.NewZap("info")
+	if err != nil {
+		log.Fatalf("create zap logs: %v", err)
+	}
+	defer deferutils.ExecSilent(logs.Sync)
 
 	reader := interactor.NewReader(os.Stdin)
 	writer := interactor.NewWriter(os.Stdout)
@@ -43,13 +47,33 @@ func main() {
 
 	sm := statemachines.NewStateMachines(userInteractor)
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
+	cmdLocal := localCmd.NewLocal(userInteractor)
 
-	cmds := commands.NewCommands(userInteractor, sm, bankCard)
+	cmds := commands.NewCommands(userInteractor, sm, bankCard, cmdLocal)
 
 	inMemoryStorage := inmemory.NewStorage()
-	mainController := controller.NewController(inMemoryStorage, userInteractor, cmds)
 
-	if err := mainController.Serve(); err != nil {
+	ctxWithCancel, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	localAutoSaveConfig := local.AutoSaveConfig{
+		SaveInterval:    cfg.LocalStoreInterval,
+		InMemoryStorage: inMemoryStorage,
+		Logs:            logs,
+	}
+
+	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, &localAutoSaveConfig)
+
+	controllerConfig := controller.Config{
+		Inmemory:   inMemoryStorage,
+		Local:      localStorage,
+		Interactor: userInteractor,
+		Cmds:       cmds,
+	}
+
+	mainController := controller.NewController(&controllerConfig)
+
+	if err := mainController.Serve(ctxWithCancel); err != nil {
 		log.Fatalf("problem with controller: %v", err)
 	}
 

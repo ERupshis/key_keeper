@@ -14,10 +14,14 @@ func (s *Storage) GetRecord(id int64) (*data.Record, error) {
 	return nil, nil
 }
 
+func (s *Storage) GetAllRecords() ([]data.Record, error) {
+	return s.records, nil
+}
+
 func (s *Storage) GetRecords(recordType data.RecordType, filters map[string]string) ([]data.Record, error) {
 	var res []data.Record
 	for idx := range s.records {
-		if !canRecordBeReturned(&s.records[idx], recordType, filters) {
+		if !canRecordBeReturned(&s.records[idx], recordType) {
 			continue
 		}
 
@@ -29,7 +33,7 @@ func (s *Storage) GetRecords(recordType data.RecordType, filters map[string]stri
 	return res, nil
 }
 
-func canRecordBeReturned(record *data.Record, recordType data.RecordType, filters map[string]string) bool {
+func canRecordBeReturned(record *data.Record, recordType data.RecordType) bool {
 	if record.Deleted {
 		return false
 	}

@@ -1,29 +1,47 @@
 package controller
 
 import (
+	"context"
+	"fmt"
 	"strings"
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
+	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 )
 
-type Controller struct {
-	inmemory *inmemory.Storage
-	iactr    *interactor.Interactor
-	cmds     *commands.Commands
+type Config struct {
+	Inmemory *inmemory.Storage
+	Local    *local.FileManager
+
+	Interactor *interactor.Interactor
+	Cmds       *commands.Commands
 }
 
-func NewController(inmemory *inmemory.Storage, interactor *interactor.Interactor, cmds *commands.Commands) *Controller {
+type Controller struct {
+	inmemory *inmemory.Storage
+	local    *local.FileManager
+
+	iactr *interactor.Interactor
+	cmds  *commands.Commands
+}
+
+func NewController(cfg *Config) *Controller {
 	return &Controller{
-		inmemory: inmemory,
-		iactr:    interactor,
-		cmds:     cmds,
+		inmemory: cfg.Inmemory,
+		local:    cfg.Local,
+		iactr:    cfg.Interactor,
+		cmds:     cfg.Cmds,
 	}
 }
 
-func (c *Controller) Serve() error {
+func (c *Controller) Serve(ctx context.Context) error {
+	if err := c.cmds.RestoreLocalStorage(ctx, c.inmemory, c.local); err != nil {
+		return fmt.Errorf("serve: %w", err)
+	}
+
 loop:
 	for {
 		commandParts, ok := c.iactr.ReadCommand()

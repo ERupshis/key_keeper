@@ -5,5 +5,6 @@ import (
 )
 
 var (
-	ErrFileIsNotOpen = fmt.Errorf("file is not open")
+	ErrFileIsNotOpen       = fmt.Errorf("file is not open")
+	ErrIncorrectPassPhrase = fmt.Errorf("incorrect passphrase")
 )

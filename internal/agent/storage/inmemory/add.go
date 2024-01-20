@@ -9,6 +9,7 @@ import (
 func (s *Storage) AddRecord(record *data.Record) error {
 	record.ID = s.getNextFreeIdx()
 	record.UpdatedAt = time.Now()
+
 	s.records = append(s.records, *record)
 	return nil
 }

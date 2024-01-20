@@ -47,6 +47,16 @@ func (fm *FileManager) ScanRecord() (*data.Record, error) {
 	return &record, nil
 }
 
+func (fm *FileManager) handleScannedRecord(record *data.Record, err error, res *[]data.Record) {
+	if err != nil {
+		fm.logs.Infof("failed to scan record from file '%s'", fm.path)
+	} else {
+		*res = append(*res, *record)
+	}
+
+	record, err = fm.ScanRecord()
+}
+
 // scan scans the file for the next line.
 func (fm *FileManager) scan() (bool, error) {
 	if !fm.scanner.scanner.Scan() {
