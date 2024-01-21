@@ -35,11 +35,18 @@ func (fm *FileManager) ScanRecord() (*data.Record, error) {
 		return nil, fmt.Errorf(errMsg, ErrFileIsNotOpen)
 	}
 
-	if isScanOk, err := fm.scan(); !isScanOk {
+	if isScanOk, err := fm.scan(); err != nil {
 		return nil, fmt.Errorf(errMsg, err)
+	} else if !isScanOk {
+		return nil, nil
 	}
 
-	recordBytes := fm.scannedBytes()
+	encryptedRecord := fm.scannedBytes()
+	recordBytes, err := fm.cryptHasher.Decrypt(encryptedRecord)
+	if err != nil {
+		return nil, fmt.Errorf(errMsg, ErrFileIsNotOpen)
+	}
+
 	if err := json.Unmarshal(recordBytes, &record); err != nil {
 		return nil, fmt.Errorf(errMsg, err)
 	}
@@ -47,14 +54,16 @@ func (fm *FileManager) ScanRecord() (*data.Record, error) {
 	return &record, nil
 }
 
-func (fm *FileManager) handleScannedRecord(record *data.Record, err error, res *[]data.Record) {
+func (fm *FileManager) handleScannedRecord(record **data.Record, err error, res *[]data.Record) {
 	if err != nil {
 		fm.logs.Infof("failed to scan record from file '%s'", fm.path)
 	} else {
-		*res = append(*res, *record)
+		*res = append(*res, **record)
 	}
 
-	record, err = fm.ScanRecord()
+	tmpRecord, tmpErr := fm.ScanRecord()
+	*record = tmpRecord
+	err = tmpErr
 }
 
 // scan scans the file for the next line.

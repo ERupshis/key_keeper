@@ -9,10 +9,15 @@ import (
 	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
+	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/erupshis/key_keeper/internal/common/data"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/ticker"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
+)
+
+const (
+	keyStorageName = "key_keeper_strg"
 )
 
 // AutoSaveConfig auto save settings.
@@ -31,15 +36,17 @@ type FileManager struct {
 	writer  *fileWriter
 	scanner *fileScanner
 
+	cryptHasher *ska.SKA
 	autoSaveCfg *AutoSaveConfig
 }
 
 // NewFileManager creates a new instance of FileManager with the specified data path and logger.
-func NewFileManager(dataPath string, logger logger.BaseLogger, autoSaveCfg *AutoSaveConfig) *FileManager {
+func NewFileManager(dataPath string, logger logger.BaseLogger, autoSaveCfg *AutoSaveConfig, cryptHasher *ska.SKA) *FileManager {
 	return &FileManager{
-		path:        dataPath,
+		path:        dataPath + keyStorageName,
 		logs:        logger,
 		autoSaveCfg: autoSaveCfg,
+		cryptHasher: cryptHasher,
 	}
 }
 
@@ -83,16 +90,16 @@ func (fm *FileManager) RestoreUserData(ctx context.Context, passPhrase string) (
 		defer deferutils.ExecWithLogError(fm.CloseFile, fm.logs)
 	}
 
-	// TODO: try to decode or create new file.
-	if passPhrase == "wrong" {
-		return nil, ErrIncorrectPassPhrase
-	}
-
+	errMsg := "restore storage: %w"
 	var res []data.Record
 	record, err := fm.ScanRecord()
 	for record != nil {
+		fm.handleScannedRecord(&record, err, &res)
 
-		fm.handleScannedRecord(record, err, &res)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf(errMsg, err)
 	}
 
 	fm.RunAutoSave(ctx)
@@ -105,9 +112,9 @@ func (fm *FileManager) IsFileOpen() bool {
 }
 
 func (fm *FileManager) IsFileExist() (bool, error) {
-	_, err := os.Stat(fm.path)
+	fileStats, err := os.Stat(fm.path)
 
-	if err == nil {
+	if err == nil && fileStats != nil {
 		return true, nil
 	} else if os.IsNotExist(err) {
 		return false, nil
@@ -152,16 +159,17 @@ func (fm *FileManager) CloseFile() error {
 	return errors.Join(errs...)
 }
 
+func (fm *FileManager) SetPassPhrase(newPassPhrase string) {
+	fm.passPhrase = newPassPhrase
+	fm.cryptHasher.SetAESKey(newPassPhrase, ska.Key16)
+}
+
 func (fm *FileManager) Path() string {
 	return fm.path
 }
 
-func (fm *FileManager) SetPassPhrase(newPassPhrase string) string {
-	return fm.passPhrase
-}
-
 func (fm *FileManager) SetPath(newPath string) {
-	fm.path = newPath
+	fm.path = newPath + keyStorageName
 }
 
 func (fm *FileManager) RunAutoSave(ctx context.Context) {

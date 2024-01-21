@@ -45,8 +45,13 @@ func (fm *FileManager) WriteRecord(record *data.Record) error {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	recordBytes = append(recordBytes, '\n')
-	if _, err = fm.write(recordBytes); err != nil {
+	encryptedRecord, err := fm.cryptHasher.Encrypt(recordBytes)
+	if err != nil {
+		return fmt.Errorf(errMsg, err)
+	}
+
+	encryptedRecord = append(encryptedRecord, '\n')
+	if _, err = fm.write(encryptedRecord); err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 

@@ -33,7 +33,7 @@ const (
 
 // checkFlags checks flags of app's launch.
 func checkFlags(config *Config) {
-	flag.StringVar(&config.LocalStoragePath, flagLocalStoragePath, "C:/data/local_storage.json", "local storage path")
+	flag.StringVar(&config.LocalStoragePath, flagLocalStoragePath, "C:/data/", "folder for local storage")
 	flag.DurationVar(&config.LocalStoreInterval, flagLocalStoreInterval, 10*time.Second, "local store interval. 0 - means store on data change")
 
 	flag.Parse()

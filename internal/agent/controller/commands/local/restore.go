@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
@@ -93,6 +94,7 @@ func (l *Local) statePassPhrase() (restoreState, string, error) {
 }
 
 func (l *Local) stateStorageDecode(ctx context.Context, inmemory *inmemory.Storage, localStorage *local.FileManager, passPhrase string) (restoreState, error) {
+	localStorage.SetPassPhrase(passPhrase)
 	records, err := localStorage.RestoreUserData(ctx, passPhrase)
 	if err != nil {
 		l.iactr.Printf("failed to decode storage, reenter passphrase or '%s' to create new storage:\n", utils.CommandCancel)
@@ -107,8 +109,7 @@ func (l *Local) stateStorageDecode(ctx context.Context, inmemory *inmemory.Stora
 }
 
 func (l *Local) stateNewStorage(localStorage *local.FileManager) (restoreState, error) {
-	l.iactr.Printf("enter new storage path(current: '%s'): ", localStorage.Path())
-
+	l.iactr.Printf("enter new storage path(current: '%s'): ", localStorage.Path()[:strings.LastIndex(localStorage.Path(), "/")])
 	newPath, ok, err := l.iactr.GetUserInputAndValidate(nil)
 	if newPath == localStorage.Path() {
 		l.iactr.Printf("attempt to rewrite existing storage, try again: ")
@@ -122,6 +123,10 @@ func (l *Local) stateNewStorage(localStorage *local.FileManager) (restoreState, 
 	if ok && errors.Is(err, errs.ErrInterruptedByUser) {
 		l.iactr.Printf("cancel is not allowed here\n")
 		return restoreNewStoragePath, nil
+	}
+
+	if !strings.HasSuffix(newPath, "/") {
+		newPath = newPath + "/"
 	}
 
 	localStorage.SetPath(newPath)
