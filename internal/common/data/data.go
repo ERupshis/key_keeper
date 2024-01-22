@@ -33,7 +33,7 @@ const (
 type RecordType = int32
 
 //go:generate easyjson -all data.go
-type Credentials struct {
+type Credential struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
@@ -57,15 +57,15 @@ type Binary struct {
 type MetaData map[string]string
 
 type Record struct {
-	ID          int64        `json:"id"`
-	RecordType  RecordType   `json:"record_type"`
-	MetaData    MetaData     `json:"meta_data,omitempty"`
-	Credentials *Credentials `json:"credentials,omitempty"`
-	BankCard    *BankCard    `json:"bank_card,omitempty"`
-	Text        *Text        `json:"text,omitempty"`
-	Binary      *Binary      `json:"binary,omitempty"`
-	Deleted     bool         `json:"deleted"`
-	UpdatedAt   time.Time    `json:"updated_at"`
+	ID          int64       `json:"id"`
+	RecordType  RecordType  `json:"record_type"`
+	MetaData    MetaData    `json:"meta_data,omitempty"`
+	Credentials *Credential `json:"credentials,omitempty"`
+	BankCard    *BankCard   `json:"bank_card,omitempty"`
+	Text        *Text       `json:"text,omitempty"`
+	Binary      *Binary     `json:"binary,omitempty"`
+	Deleted     bool        `json:"deleted"`
+	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
 func (r Record) String() string {
@@ -74,7 +74,7 @@ func (r Record) String() string {
 
 	switch r.RecordType {
 	case TypeCredentials:
-		formatBuilder.WriteString(" Credentials: %+v,")
+		formatBuilder.WriteString(" Credential: %+v,")
 	case TypeBankCard:
 		formatBuilder.WriteString(" BankCard: %+v,")
 	case TypeText:
@@ -99,7 +99,7 @@ func (r Record) TabString() string {
 
 	switch r.RecordType {
 	case TypeCredentials:
-		formatBuilder.WriteString("\tCredentials: %+v")
+		formatBuilder.WriteString("\tCredential: %+v")
 	case TypeBankCard:
 		formatBuilder.WriteString("\tBankCard: %+v")
 	case TypeText:

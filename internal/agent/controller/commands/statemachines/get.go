@@ -122,7 +122,7 @@ func (s *StateMachines) getMethod() (string, error) {
 }
 
 func (s *StateMachines) stateGetMethodInitial() stateGetMethod {
-	fmt.Printf("insert search method('%s' or '%s'): ", utils.CommandID, utils.CommandFilters)
+	fmt.Printf("enter search method('%s' or '%s'): ", utils.CommandID, utils.CommandFilters)
 	return getMethodSelectionState
 }
 
@@ -176,7 +176,7 @@ func (s *StateMachines) getID() (int64, error) {
 }
 
 func (s *StateMachines) stateGetIDInitial() stateGetID {
-	fmt.Printf("insert record %s: ", utils.CommandID)
+	fmt.Printf("enter record %s: ", utils.CommandID)
 	return getIDValueState
 }
 
@@ -236,7 +236,7 @@ func (s *StateMachines) getFilters() (map[string]string, error) {
 
 func (s *StateMachines) stateGetFiltersInitial() stateGetFilters {
 	fmt.Printf(
-		"insert filters through meta data(format: 'key%svalue') or '%s' or '%s': ",
+		"enter filters through meta data(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
 		utils.CommandContinue,
@@ -248,7 +248,7 @@ func (s *StateMachines) stateGetFiltersValue(filters map[string]string) (stateGe
 	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexGetFilters)
 
 	if metaData == utils.CommandContinue {
-		fmt.Printf("inserted filters: %s\n", filters)
+		fmt.Printf("entered filters: %s\n", filters)
 		return getFiltersFinishState, err
 	}
 

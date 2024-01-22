@@ -93,7 +93,7 @@ func (s *StateMachines) addMetaData(record *data.Record) error {
 
 func (s *StateMachines) stateMetaInitial() stateAddMeta {
 	fmt.Printf(
-		"insert meta data(format: 'key%svalue') or '%s' or '%s': ",
+		"enter meta data(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
 		utils.CommandSave,
@@ -105,7 +105,7 @@ func (s *StateMachines) stateMetaData(record *data.Record) (stateAddMeta, error)
 	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
-		fmt.Printf("inserted metadata: %s\n", record.MetaData)
+		fmt.Printf("entered metadata: %s\n", record.MetaData)
 		return addMetaFinishState, err
 	}
 

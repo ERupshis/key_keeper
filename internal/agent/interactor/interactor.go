@@ -38,7 +38,7 @@ func (i *Interactor) Writer() *Writer {
 }
 
 func (i *Interactor) ReadCommand() ([]string, bool) {
-	i.Printf("Insert command (or '%s'): ", utils.CommandExit)
+	i.Printf("enter command (or '%s'): ", utils.CommandExit)
 	command, _, _ := i.GetUserInputAndValidate(nil)
 	command = strings.TrimSpace(command)
 	commandParts := strings.Split(command, " ")

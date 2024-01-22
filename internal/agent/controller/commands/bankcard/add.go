@@ -88,7 +88,7 @@ func (b *BankCard) addMainData(record *data.Record) error {
 }
 
 func (b *BankCard) stateInitial(record *data.Record) addState {
-	b.iactr.Printf("insert card number(%s): ", record.BankCard.Number)
+	b.iactr.Printf("enter card number(%s): ", record.BankCard.Number)
 	return addNumberState
 }
 
@@ -104,7 +104,7 @@ func (b *BankCard) stateNumber(record *data.Record) (addState, error) {
 		return addNumberState, err
 	}
 
-	b.iactr.Printf("insert card expiration (%s): ", record.BankCard.Expiration)
+	b.iactr.Printf("enter card expiration (%s): ", record.BankCard.Expiration)
 	return addExpirationState, err
 
 }
@@ -120,7 +120,7 @@ func (b *BankCard) stateExpiration(record *data.Record) (addState, error) {
 		return addExpirationState, err
 	}
 
-	b.iactr.Printf("insert card CVV (%s): ", record.BankCard.CVV)
+	b.iactr.Printf("enter card CVV (%s): ", record.BankCard.CVV)
 	return addCVVState, err
 }
 
@@ -137,9 +137,9 @@ func (b *BankCard) stateCVV(record *data.Record) (addState, error) {
 	}
 
 	if record.BankCard.Name == "" {
-		b.iactr.Printf("insert card holder name: ")
+		b.iactr.Printf("enter card holder name: ")
 	} else {
-		b.iactr.Printf("insert card holder name(%s): ", record.BankCard.Name)
+		b.iactr.Printf("enter card holder name(%s): ", record.BankCard.Name)
 	}
 	return addCardHolderState, err
 }
@@ -156,6 +156,6 @@ func (b *BankCard) stateCardHolder(record *data.Record) (addState, error) {
 		return addCardHolderState, err
 	}
 
-	b.iactr.Printf("inserted card data: %+v\n", *record.BankCard)
+	b.iactr.Printf("entered card data: %+v\n", *record.BankCard)
 	return addFinishState, err
 }

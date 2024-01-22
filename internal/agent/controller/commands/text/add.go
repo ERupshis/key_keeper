@@ -67,6 +67,7 @@ func (t *Text) stateData(record *data.Record) (addState, error) {
 		return addDataState, err
 	}
 
+	t.iactr.Printf("entered credential data: %+v\n", *record.Text)
 	return addFinishState, err
 
 }

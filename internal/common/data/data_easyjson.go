@@ -132,7 +132,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(in *jle
 				out.Credentials = nil
 			} else {
 				if out.Credentials == nil {
-					out.Credentials = new(Credentials)
+					out.Credentials = new(Credential)
 				}
 				(*out.Credentials).UnmarshalEasyJSON(in)
 			}
@@ -271,7 +271,7 @@ func (v *Record) UnmarshalJSON(data []byte) error {
 func (v *Record) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(l, v)
 }
-func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jlexer.Lexer, out *Credentials) {
+func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jlexer.Lexer, out *Credential) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -304,7 +304,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jle
 		in.Consumed()
 	}
 }
-func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jwriter.Writer, in Credentials) {
+func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jwriter.Writer, in Credential) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -322,26 +322,26 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jw
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Credentials) MarshalJSON() ([]byte, error) {
+func (v Credential) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Credentials) MarshalEasyJSON(w *jwriter.Writer) {
+func (v Credential) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Credentials) UnmarshalJSON(data []byte) error {
+func (v *Credential) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Credentials) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *Credential) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(l, v)
 }
 func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(in *jlexer.Lexer, out *Binary) {
