@@ -166,6 +166,12 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData1(in *jle
 				}
 				(*out.Binary).UnmarshalEasyJSON(in)
 			}
+		case "deleted":
+			out.Deleted = bool(in.Bool())
+		case "updated_at":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.UpdatedAt).UnmarshalJSON(data))
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -229,6 +235,16 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData1(out *jw
 		out.RawString(prefix)
 		(*in.Binary).MarshalEasyJSON(out)
 	}
+	{
+		const prefix string = ",\"deleted\":"
+		out.RawString(prefix)
+		out.Bool(bool(in.Deleted))
+	}
+	{
+		const prefix string = ",\"updated_at\":"
+		out.RawString(prefix)
+		out.Raw((in.UpdatedAt).MarshalJSON())
+	}
 	out.RawByte('}')
 }
 
@@ -274,7 +290,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jle
 			continue
 		}
 		switch key {
-		case "key":
+		case "login":
 			out.Login = string(in.String())
 		case "password":
 			out.Password = string(in.String())
@@ -293,7 +309,7 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jw
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"key\":"
+		const prefix string = ",\"login\":"
 		out.RawString(prefix[1:])
 		out.String(string(in.Login))
 	}
@@ -347,8 +363,10 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData3(in *jle
 			continue
 		}
 		switch key {
-		case "data":
-			out.Data = string(in.String())
+		case "name":
+			out.Name = string(in.String())
+		case "file":
+			out.SecuredFileName = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -364,9 +382,14 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData3(out *jw
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"data\":"
+		const prefix string = ",\"name\":"
 		out.RawString(prefix[1:])
-		out.String(string(in.Data))
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"file\":"
+		out.RawString(prefix)
+		out.String(string(in.SecuredFileName))
 	}
 	out.RawByte('}')
 }

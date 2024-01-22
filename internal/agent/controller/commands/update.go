@@ -57,6 +57,8 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 		err = c.bc.ProcessUpdateCommand(tmpRecord)
 	case data.TypeText:
 		err = c.text.ProcessUpdateCommand(tmpRecord)
+	case data.TypeBinary:
+		err = c.binary.ProcessUpdateCommand(tmpRecord)
 	default:
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, errs.ErrIncorrectRecordType)
 	}

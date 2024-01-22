@@ -45,7 +45,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return nil
+			return c.saveRecordsLocally(ctx)
 		default:
 			commandParts, ok := c.iactr.ReadCommand()
 			if !ok {

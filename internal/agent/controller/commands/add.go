@@ -53,6 +53,8 @@ func (c *Commands) handleAdd(recordType data.RecordType, storage *inmemory.Stora
 		err = c.creds.ProcessAddCommand(newRecord)
 	case data.TypeText:
 		err = c.text.ProcessAddCommand(newRecord)
+	case data.TypeBinary:
+		err = c.binary.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
 	}

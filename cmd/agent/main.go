@@ -10,6 +10,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/binary"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/credential"
 	localCmd "github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
@@ -52,6 +53,7 @@ func main() {
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
 	cred := credential.NewCredentials(userInteractor, sm)
 	txt := text.NewText(userInteractor, sm)
+	bin := binary.NewBinary(userInteractor, sm)
 	cmdLocal := localCmd.NewLocal(userInteractor)
 
 	cmdConfig := commands.Config{
@@ -59,15 +61,13 @@ func main() {
 		BankCard:        bankCard,
 		Credential:      cred,
 		Text:            txt,
+		Binary:          bin,
 		LocalStorageCmd: cmdLocal,
 	}
+
 	cmds := commands.NewCommands(userInteractor, &cmdConfig)
 
 	inMemoryStorage := inmemory.NewStorage()
-
-	ctxWithCancel, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	localAutoSaveConfig := local.AutoSaveConfig{
 		SaveInterval:    cfg.LocalStoreInterval,
 		InMemoryStorage: inMemoryStorage,
@@ -85,6 +85,9 @@ func main() {
 	}
 
 	mainController := controller.NewController(&controllerConfig)
+
+	ctxWithCancel, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	if err := mainController.Serve(ctxWithCancel); err != nil {
 		log.Fatalf("problem with controller: %v", err)

@@ -66,8 +66,6 @@ func (fm *FileManager) CheckConnection(ctx context.Context) (bool, error) {
 
 // SaveUserData saves user data in the file.
 func (fm *FileManager) SaveUserData(ctx context.Context, records []data.Record) error {
-	fm.iactr.Printf("start saving data locally\n")
-	defer fm.iactr.Printf("data saving completed\n")
 	if !fm.IsFileOpen() {
 		if err := fm.OpenFile(fm.path, true); err != nil {
 			return fmt.Errorf("cannot open file '%s' to save user data: %w", fm.path, err)

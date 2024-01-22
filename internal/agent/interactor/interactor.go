@@ -60,7 +60,7 @@ func (i *Interactor) GetUserInputAndValidate(regex *regexp.Regexp) (string, bool
 	}
 
 	input = strings.TrimSpace(strings.TrimRight(input, "\r\n"))
-	if input == utils.CommandCancel {
+	if input == utils.CommandCancel || errors.Is(err, io.EOF) {
 		return input, true, errs.ErrInterruptedByUser
 	}
 

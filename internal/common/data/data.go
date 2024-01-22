@@ -50,7 +50,8 @@ type Text struct {
 }
 
 type Binary struct {
-	Data string `json:"data"`
+	Name            string `json:"name"`
+	SecuredFileName string `json:"file"`
 }
 
 type MetaData map[string]string

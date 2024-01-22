@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/binary"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/credential"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
@@ -16,6 +17,7 @@ type Config struct {
 	BankCard   *bankcard.BankCard
 	Credential *credential.Credential
 	Text       *text.Text
+	Binary     *binary.Binary
 }
 
 type Commands struct {
@@ -24,18 +26,20 @@ type Commands struct {
 
 	sm *statemachines.StateMachines
 
-	bc    *bankcard.BankCard
-	creds *credential.Credential
-	text  *text.Text
+	bc     *bankcard.BankCard
+	creds  *credential.Credential
+	text   *text.Text
+	binary *binary.Binary
 }
 
 func NewCommands(iactr *interactor.Interactor, cfg *Config) *Commands {
 	return &Commands{
-		iactr: iactr,
-		local: cfg.LocalStorageCmd,
-		sm:    cfg.StateMachines,
-		bc:    cfg.BankCard,
-		creds: cfg.Credential,
-		text:  cfg.Text,
+		iactr:  iactr,
+		local:  cfg.LocalStorageCmd,
+		sm:     cfg.StateMachines,
+		bc:     cfg.BankCard,
+		creds:  cfg.Credential,
+		text:   cfg.Text,
+		binary: cfg.Binary,
 	}
 }
