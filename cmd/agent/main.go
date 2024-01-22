@@ -10,6 +10,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/bankcard"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/credential"
 	localCmd "github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
@@ -48,9 +49,16 @@ func main() {
 
 	sm := statemachines.NewStateMachines(userInteractor)
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
+	cred := credential.NewCredentials(userInteractor, sm)
 	cmdLocal := localCmd.NewLocal(userInteractor)
 
-	cmds := commands.NewCommands(userInteractor, sm, bankCard, cmdLocal)
+	cmdConfig := commands.Config{
+		StateMachines:   sm,
+		BankCard:        bankCard,
+		Credential:      cred,
+		LocalStorageCmd: cmdLocal,
+	}
+	cmds := commands.NewCommands(userInteractor, &cmdConfig)
 
 	inMemoryStorage := inmemory.NewStorage()
 

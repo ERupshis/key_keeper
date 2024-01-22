@@ -275,7 +275,7 @@ func easyjson794297d0DecodeGithubComErupshisKeyKeeperInternalCommonData2(in *jle
 		}
 		switch key {
 		case "key":
-			out.Key = string(in.String())
+			out.Login = string(in.String())
 		case "password":
 			out.Password = string(in.String())
 		default:
@@ -295,7 +295,7 @@ func easyjson794297d0EncodeGithubComErupshisKeyKeeperInternalCommonData2(out *jw
 	{
 		const prefix string = ",\"key\":"
 		out.RawString(prefix[1:])
-		out.String(string(in.Key))
+		out.String(string(in.Login))
 	}
 	{
 		const prefix string = ",\"password\":"

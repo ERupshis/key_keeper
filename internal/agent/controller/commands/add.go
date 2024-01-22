@@ -49,6 +49,8 @@ func (c *Commands) handleAdd(recordType data.RecordType, storage *inmemory.Stora
 	switch recordType {
 	case data.TypeBankCard:
 		err = c.bc.ProcessAddCommand(newRecord)
+	case data.TypeCredentials:
+		err = c.creds.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
 	}

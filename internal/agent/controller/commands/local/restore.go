@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
@@ -26,10 +25,6 @@ const (
 	restoreNewStoragePath = restoreState(3)
 	restoreNewPassPhrase  = restoreState(4)
 	restoreFinishState    = restoreState(5)
-)
-
-var (
-	regexNewStorageAndPassPhrase = regexp.MustCompile(`^(.*?)\s*:\s*(.*?)$`)
 )
 
 func (l *Local) handleRestore(ctx context.Context, exist bool, inmemory *inmemory.Storage, localStorage *local.FileManager) error {
@@ -137,7 +132,6 @@ func (l *Local) stateNewPassPhrase(ctx context.Context, localStorage *local.File
 	l.iactr.Printf("enter passphrase for local storage securing: ")
 
 	newPassPhrase, ok, err := l.iactr.GetUserInputAndValidate(nil)
-
 	if !ok {
 		return restoreNewStoragePath, err
 	}

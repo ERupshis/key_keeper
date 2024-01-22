@@ -34,7 +34,7 @@ type RecordType = int32
 
 //go:generate easyjson -all data.go
 type Credentials struct {
-	Key      string `json:"key"`
+	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 
