@@ -51,6 +51,8 @@ func (c *Commands) handleAdd(recordType data.RecordType, storage *inmemory.Stora
 		err = c.bc.ProcessAddCommand(newRecord)
 	case data.TypeCredentials:
 		err = c.creds.ProcessAddCommand(newRecord)
+	case data.TypeText:
+		err = c.text.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
 	}

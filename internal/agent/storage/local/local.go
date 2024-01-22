@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/erupshis/key_keeper/internal/agent/interactor"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/erupshis/key_keeper/internal/common/data"
@@ -32,6 +33,8 @@ type FileManager struct {
 	path       string
 	passPhrase string
 
+	iactr *interactor.Interactor
+
 	logs    logger.BaseLogger
 	writer  *fileWriter
 	scanner *fileScanner
@@ -41,10 +44,11 @@ type FileManager struct {
 }
 
 // NewFileManager creates a new instance of FileManager with the specified data path and logger.
-func NewFileManager(dataPath string, logger logger.BaseLogger, autoSaveCfg *AutoSaveConfig, cryptHasher *ska.SKA) *FileManager {
+func NewFileManager(dataPath string, logger logger.BaseLogger, iactr *interactor.Interactor, autoSaveCfg *AutoSaveConfig, cryptHasher *ska.SKA) *FileManager {
 	return &FileManager{
 		path:        dataPath + keyStorageName,
 		logs:        logger,
+		iactr:       iactr,
 		autoSaveCfg: autoSaveCfg,
 		cryptHasher: cryptHasher,
 	}
@@ -62,6 +66,8 @@ func (fm *FileManager) CheckConnection(ctx context.Context) (bool, error) {
 
 // SaveUserData saves user data in the file.
 func (fm *FileManager) SaveUserData(ctx context.Context, records []data.Record) error {
+	fm.iactr.Printf("start saving data locally\n")
+	defer fm.iactr.Printf("data saving completed\n")
 	if !fm.IsFileOpen() {
 		if err := fm.OpenFile(fm.path, true); err != nil {
 			return fmt.Errorf("cannot open file '%s' to save user data: %w", fm.path, err)

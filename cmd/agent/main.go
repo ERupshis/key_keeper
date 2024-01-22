@@ -13,6 +13,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/credential"
 	localCmd "github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/text"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
@@ -50,12 +51,14 @@ func main() {
 	sm := statemachines.NewStateMachines(userInteractor)
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
 	cred := credential.NewCredentials(userInteractor, sm)
+	txt := text.NewText(userInteractor, sm)
 	cmdLocal := localCmd.NewLocal(userInteractor)
 
 	cmdConfig := commands.Config{
 		StateMachines:   sm,
 		BankCard:        bankCard,
 		Credential:      cred,
+		Text:            txt,
 		LocalStorageCmd: cmdLocal,
 	}
 	cmds := commands.NewCommands(userInteractor, &cmdConfig)
@@ -72,7 +75,7 @@ func main() {
 	}
 
 	dataCryptor := ska.NewSKA("some user key", ska.Key16)
-	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, &localAutoSaveConfig, dataCryptor)
+	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, userInteractor, &localAutoSaveConfig, dataCryptor)
 
 	controllerConfig := controller.Config{
 		Inmemory:   inMemoryStorage,
