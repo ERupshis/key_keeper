@@ -20,8 +20,6 @@ func (c *Commands) Update(parts []string, storage *inmemory.Storage) {
 		c.handleCommandError(err, utils.CommandUpdate, nil)
 		return
 	}
-
-	return
 }
 
 func (c *Commands) handleUpdate(storage *inmemory.Storage) error {

@@ -61,9 +61,7 @@ func (fm *FileManager) handleScannedRecord(record **data.Record, err error, res 
 		*res = append(*res, **record)
 	}
 
-	tmpRecord, tmpErr := fm.ScanRecord()
-	*record = tmpRecord
-	err = tmpErr
+	*record, err = fm.ScanRecord()
 }
 
 // scan scans the file for the next line.

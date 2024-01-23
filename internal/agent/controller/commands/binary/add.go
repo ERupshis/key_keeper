@@ -80,6 +80,10 @@ func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
 	}
 
 	fileBytes, err := os.ReadFile(pathToFile)
+	if err != nil {
+		return addFilePathState, fmt.Errorf(errMsg, err)
+	}
+
 	hashSum, err := b.hash.HashMsg(fileBytes)
 	if err != nil {
 		return addFilePathState, fmt.Errorf(errMsg, err)

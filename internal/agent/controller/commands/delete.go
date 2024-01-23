@@ -20,8 +20,6 @@ func (c *Commands) Delete(parts []string, storage *inmemory.Storage) {
 		c.handleCommandError(err, utils.CommandDelete, nil)
 		return
 	}
-
-	return
 }
 
 func (c *Commands) handleDelete(storage *inmemory.Storage) error {

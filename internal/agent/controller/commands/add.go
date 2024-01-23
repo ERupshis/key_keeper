@@ -24,7 +24,6 @@ func (c *Commands) Add(parts []string, storage *inmemory.Storage) {
 	}
 
 	c.iactr.Printf("record added: %s\n", record)
-	return
 }
 
 func (c *Commands) handleCommandError(err error, command string, supportedTypes []string) {

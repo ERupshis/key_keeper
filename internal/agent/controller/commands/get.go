@@ -24,7 +24,6 @@ func (c *Commands) Get(parts []string, storage *inmemory.Storage) {
 	}
 
 	c.writeGetResult(records)
-	return
 }
 
 func (c *Commands) writeGetResult(records []data.Record) {
@@ -36,7 +35,7 @@ func (c *Commands) writeGetResult(records []data.Record) {
 
 		w := tabwriter.NewWriter(c.iactr.Writer(), 0, 0, 2, ' ', 0)
 		for idx, record := range records {
-			_, _ = fmt.Fprintf(w, fmt.Sprintf("   %d.%s\n", idx, record.TabString()))
+			_, _ = fmt.Fprint(w, "   ", idx, ".", record.TabString(), "\n")
 		}
 		_ = w.Flush()
 

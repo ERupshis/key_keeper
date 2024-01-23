@@ -21,6 +21,9 @@ func (b *Binary) ProcessExtractCommand(record *data.Record) error {
 func (b *Binary) fileSave(record *data.Record, pathToFile string) error {
 	errMsg := "decode and save file from local storage: %w"
 	fileBytes, err := os.ReadFile(filepath.Join(b.storePath, record.Binary.SecuredFileName))
+	if err != nil {
+		return fmt.Errorf(errMsg, err)
+	}
 
 	decryptedFileBytes, err := b.cryptor.Decrypt(fileBytes)
 	if err != nil {

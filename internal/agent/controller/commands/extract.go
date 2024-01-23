@@ -26,8 +26,6 @@ func (c *Commands) Extract(parts []string, storage *inmemory.Storage) {
 		c.handleCommandError(err, utils.CommandExtract, supportedTypes)
 		return
 	}
-
-	return
 }
 
 func (c *Commands) handleExtract(records []data.Record) error {
