@@ -19,6 +19,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
+	"github.com/erupshis/key_keeper/internal/common/hasher"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 )
@@ -53,7 +54,19 @@ func main() {
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
 	cred := credential.NewCredentials(userInteractor, sm)
 	txt := text.NewText(userInteractor, sm)
-	bin := binary.NewBinary(userInteractor, sm)
+
+	dataCryptor := ska.NewSKA("some user key", ska.Key16)
+	hash := hasher.CreateHasher(cfg.HashKey, hasher.TypeSHA256, logs)
+
+	binaryConfig := binary.Config{
+		Iactr:     userInteractor,
+		Sm:        sm,
+		Hash:      hash,
+		Cryptor:   dataCryptor,
+		StorePath: cfg.LocalStoragePath,
+	}
+	bin := binary.NewBinary(&binaryConfig)
+
 	cmdLocal := localCmd.NewLocal(userInteractor)
 
 	cmdConfig := commands.Config{
@@ -64,7 +77,6 @@ func main() {
 		Binary:          bin,
 		LocalStorageCmd: cmdLocal,
 	}
-
 	cmds := commands.NewCommands(userInteractor, &cmdConfig)
 
 	inMemoryStorage := inmemory.NewStorage()
@@ -74,7 +86,6 @@ func main() {
 		Logs:            logs,
 	}
 
-	dataCryptor := ska.NewSKA("some user key", ska.Key16)
 	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, userInteractor, &localAutoSaveConfig, dataCryptor)
 
 	controllerConfig := controller.Config{

@@ -15,6 +15,7 @@ import (
 type Config struct {
 	LocalStoragePath   string
 	LocalStoreInterval time.Duration
+	HashKey            string
 }
 
 // Parse main func to parse variables.
@@ -29,12 +30,14 @@ func Parse() (Config, error) {
 const (
 	flagLocalStoragePath   = "lsp"
 	flagLocalStoreInterval = "lsi"
+	flagHashKey            = "h"
 )
 
 // checkFlags checks flags of app's launch.
 func checkFlags(config *Config) {
 	flag.StringVar(&config.LocalStoragePath, flagLocalStoragePath, "C:/key_keeper/data/", "folder for local storage")
 	flag.DurationVar(&config.LocalStoreInterval, flagLocalStoreInterval, 10*time.Second, "local store interval. 0 - means store on data change")
+	flag.StringVar(&config.HashKey, flagHashKey, "", "hash key for binary files hash sum calculation")
 
 	flag.Parse()
 }
@@ -44,6 +47,7 @@ func checkFlags(config *Config) {
 type envConfig struct {
 	LocalStoragePath   string `env:"LOCAL_STORAGE_PATH"`
 	LocalStoreInterval string `env:"LOCAL_STORE_INTERVAL"`
+	HashKey            string `env:"HASH_KEY"`
 }
 
 // checkEnvironments checks environments suitable for agent.
@@ -57,6 +61,7 @@ func checkEnvironments(config *Config) error {
 	var errs []error
 	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.LocalStoragePath, envs.LocalStoragePath))
 	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.LocalStoreInterval, envs.LocalStoreInterval))
+	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.HashKey, envs.HashKey))
 
 	resErr := errors.Join(errs...)
 	if resErr != nil {

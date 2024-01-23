@@ -6,6 +6,7 @@ const (
 	CommandContinue = "continue"
 	CommandDelete   = "delete"
 	CommandExit     = "exit"
+	CommandExtract  = "extract"
 	CommandGet      = "get"
 	CommandSave     = "save"
 	CommandUpdate   = "update"

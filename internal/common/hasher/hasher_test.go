@@ -14,7 +14,7 @@ import (
 func TestHasher_HashMsg(t *testing.T) {
 	type fields struct {
 		log      logger.BaseLogger
-		hashType int
+		hashType HashType
 	}
 	type args struct {
 		msg []byte
@@ -31,7 +31,7 @@ func TestHasher_HashMsg(t *testing.T) {
 			name: "common case",
 			fields: fields{
 				log:      logger.CreateMock(),
-				hashType: SHA256,
+				hashType: TypeSHA256,
 			},
 			args: args{
 				msg: []byte("{\"some message text\"}"),
@@ -76,7 +76,7 @@ func TestHasher_HashMsg(t *testing.T) {
 func TestHasher_checkRequestHash(t *testing.T) {
 	type fields struct {
 		log      logger.BaseLogger
-		hashType int
+		hashType HashType
 	}
 	type args struct {
 		hashHeaderValue string
@@ -94,7 +94,7 @@ func TestHasher_checkRequestHash(t *testing.T) {
 			name: "common case",
 			fields: fields{
 				log:      logger.CreateMock(),
-				hashType: SHA256,
+				hashType: TypeSHA256,
 			},
 			args: args{
 				hashHeaderValue: "b325442b7351543173366c32ad347b7f2b643e6bdabe7aa3717c819caeb9726c",
@@ -108,7 +108,7 @@ func TestHasher_checkRequestHash(t *testing.T) {
 			name: "empty hashKey",
 			fields: fields{
 				log:      logger.CreateMock(),
-				hashType: SHA256,
+				hashType: TypeSHA256,
 			},
 			args: args{
 				hashHeaderValue: "b325442b7351543173366c32ad347b7f2b643e6bdabe7aa3717c819caeb9726c",
@@ -122,7 +122,7 @@ func TestHasher_checkRequestHash(t *testing.T) {
 			name: "empty hashHeaderValue",
 			fields: fields{
 				log:      logger.CreateMock(),
-				hashType: SHA256,
+				hashType: TypeSHA256,
 			},
 			args: args{
 				hashHeaderValue: "",
@@ -136,7 +136,7 @@ func TestHasher_checkRequestHash(t *testing.T) {
 			name: "incorrect hashHeaderValue",
 			fields: fields{
 				log:      logger.CreateMock(),
-				hashType: SHA256,
+				hashType: TypeSHA256,
 			},
 			args: args{
 				hashHeaderValue: "wrong",
@@ -171,7 +171,7 @@ func TestHasher_checkRequestHash(t *testing.T) {
 func TestHasher_isRequestValid(t *testing.T) {
 	type fields struct {
 		log      logger.BaseLogger
-		hashType int
+		hashType HashType
 	}
 	type args struct {
 		hashHeaderValue string
@@ -188,7 +188,7 @@ func TestHasher_isRequestValid(t *testing.T) {
 		{
 			name: "common case",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -202,7 +202,7 @@ func TestHasher_isRequestValid(t *testing.T) {
 		{
 			name: "empty hashHeaderValue",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -216,7 +216,7 @@ func TestHasher_isRequestValid(t *testing.T) {
 		{
 			name: "empty hashKey",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -230,7 +230,7 @@ func TestHasher_isRequestValid(t *testing.T) {
 		{
 			name: "incorrect hash",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -269,7 +269,7 @@ func TestHasher_isRequestValid(t *testing.T) {
 func TestHasher_WriteHashHeaderInResponseIfNeed(t *testing.T) {
 	type fields struct {
 		log      logger.BaseLogger
-		hashType int
+		hashType HashType
 	}
 	type args struct {
 		w            http.ResponseWriter
@@ -288,7 +288,7 @@ func TestHasher_WriteHashHeaderInResponseIfNeed(t *testing.T) {
 		{
 			name: "common case",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -303,7 +303,7 @@ func TestHasher_WriteHashHeaderInResponseIfNeed(t *testing.T) {
 		{
 			name: "empty key",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -334,7 +334,7 @@ func TestHasher_WriteHashHeaderInResponseIfNeed(t *testing.T) {
 func TestHasher_Handler(t *testing.T) {
 	type fields struct {
 		log      logger.BaseLogger
-		hashType int
+		hashType HashType
 	}
 	type args struct {
 		hashHeaderValue string
@@ -353,7 +353,7 @@ func TestHasher_Handler(t *testing.T) {
 		{
 			name: "common case",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -368,7 +368,7 @@ func TestHasher_Handler(t *testing.T) {
 		{
 			name: "empty key",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -383,7 +383,7 @@ func TestHasher_Handler(t *testing.T) {
 		{
 			name: "empty hash",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{
@@ -398,7 +398,7 @@ func TestHasher_Handler(t *testing.T) {
 		{
 			name: "invalid hash",
 			fields: fields{
-				hashType: SHA256,
+				hashType: TypeSHA256,
 				log:      logger.CreateMock(),
 			},
 			args: args{

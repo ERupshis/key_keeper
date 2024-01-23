@@ -2,6 +2,7 @@ package binary
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -50,9 +51,10 @@ func (b *Binary) addMainData(record *data.Record) error {
 		}
 	}
 
-	if currentLocalFile != "" {
-		// TODO: remove old file from storage.
+	if err = b.removeOldSecuredFile(currentLocalFile); err != nil {
+		return err
 	}
+
 	return nil
 }
 
@@ -62,6 +64,7 @@ func (b *Binary) stateInitial(record *data.Record) addState {
 }
 
 func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
+	errMsg := "read anf secure binary data: %w"
 	pathToFile, ok, err := b.iactr.GetUserInputAndValidate(nil)
 	if !ok {
 		return addFilePathState, err
@@ -76,13 +79,38 @@ func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
 		return addFilePathState, nil
 	}
 
-	record.Binary.Name = filepath.Base(pathToFile)
 	fileBytes, err := os.ReadFile(pathToFile)
-	// TODO: add hash - it will be the name of secured file.
-	// TODO: add ska securing for file data.
-	// TODO: secured data need to store in the same folder as other entities data.
-	//
-	b.iactr.Printf("%s", string(fileBytes))
-	return addFinishState, err
+	hashSum, err := b.hash.HashMsg(fileBytes)
+	if err != nil {
+		return addFilePathState, fmt.Errorf(errMsg, err)
+	}
 
+	record.Binary.Name = filepath.Base(pathToFile)
+	record.Binary.SecuredFileName = hashSum
+
+	encryptedFileBytes, err := b.cryptor.Encrypt(fileBytes)
+	if err != nil {
+		return addFilePathState, fmt.Errorf(errMsg, err)
+	}
+
+	err = os.WriteFile(filepath.Join(b.storePath, hashSum), encryptedFileBytes, 0666)
+	if err != nil {
+		return addFilePathState, fmt.Errorf(errMsg, err)
+	}
+
+	b.iactr.Printf("file saved: %+v\n", *record.Binary)
+	return addFinishState, err
+}
+
+func (b *Binary) removeOldSecuredFile(fileName string) error {
+	if fileName == "" {
+		return nil
+	}
+
+	err := os.Remove(filepath.Join(b.storePath, fileName))
+	if err != nil {
+		return fmt.Errorf("remove old secured file: %w", err)
+	}
+
+	return nil
 }

@@ -60,7 +60,7 @@ func (fm *FileManager) Close() error {
 }
 
 // CheckConnection checks the file connection status and always returns true for FileManager.
-func (fm *FileManager) CheckConnection(ctx context.Context) (bool, error) {
+func (fm *FileManager) CheckConnection(_ context.Context) (bool, error) {
 	return true, nil
 }
 
@@ -99,7 +99,6 @@ func (fm *FileManager) RestoreUserData(ctx context.Context, passPhrase string) (
 	record, err := fm.ScanRecord()
 	for record != nil {
 		fm.handleScannedRecord(&record, err, &res)
-
 	}
 
 	if err != nil {

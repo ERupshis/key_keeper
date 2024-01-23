@@ -61,6 +61,8 @@ func (c *Controller) Serve(ctx context.Context) error {
 				c.cmds.Get(commandParts, c.inmemory)
 			case utils.CommandUpdate:
 				c.cmds.Update(commandParts, c.inmemory)
+			case utils.CommandExtract:
+				c.cmds.Extract(commandParts, c.inmemory)
 			case utils.CommandExit:
 				c.iactr.Printf("Exit from app\n")
 				return c.saveRecordsLocally(ctx) // TODO: need to move in stop controller func.

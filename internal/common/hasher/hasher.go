@@ -13,8 +13,10 @@ import (
 	"github.com/erupshis/key_keeper/internal/common/logger"
 )
 
+type HashType int
+
 const (
-	SHA256 = iota // type of used hash algorithm
+	TypeSHA256 = HashType(0) // type of used hash algorithm
 )
 
 const (
@@ -33,12 +35,12 @@ type readCloserWrapper struct {
 // Hasher stores hash related config data.
 type Hasher struct {
 	log      logger.BaseLogger
-	hashType int    // type of algorithm
-	key      string // hash key
+	hashType HashType // type of algorithm
+	key      string   // hash key
 }
 
 // CreateHasher create method.
-func CreateHasher(hashKey string, hashType int, log logger.BaseLogger) *Hasher {
+func CreateHasher(hashKey string, hashType HashType, log logger.BaseLogger) *Hasher {
 	return &Hasher{key: hashKey, hashType: hashType, log: log}
 }
 
@@ -158,7 +160,7 @@ func (hr *Hasher) checkRequestHash(hashHeaderValue string, body []byte) (bool, e
 // GetHeader returns http Header key of used hash type.
 func (hr *Hasher) GetHeader() string {
 	switch hr.hashType {
-	case SHA256:
+	case TypeSHA256:
 		return headerSHA256
 	default:
 		return headerSHA256
@@ -168,7 +170,7 @@ func (hr *Hasher) GetHeader() string {
 // getAlgo returns used algo.
 func (hr *Hasher) getAlgo() (int, error) {
 	switch hr.hashType {
-	case SHA256:
+	case TypeSHA256:
 		return algoSHA256, nil
 	default:
 		return -1, fmt.Errorf("unknow algorithm")
