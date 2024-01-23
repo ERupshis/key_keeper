@@ -98,7 +98,13 @@ func (fm *FileManager) RestoreUserData(ctx context.Context) ([]data.Record, erro
 	var res []data.Record
 	record, err := fm.ScanRecord()
 	for record != nil {
-		fm.handleScannedRecord(&record, err, &res)
+		if err != nil {
+			fm.logs.Infof("failed to scan record from file '%s'", fm.path)
+		} else {
+			res = append(res, *record)
+		}
+
+		record, err = fm.ScanRecord()
 	}
 
 	if err != nil {
