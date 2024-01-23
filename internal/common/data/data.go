@@ -27,7 +27,7 @@ const (
 )
 
 const (
-	DataInvalid = "INVALID"
+	Invalid = "INVALID"
 )
 
 type RecordType = int32

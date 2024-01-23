@@ -75,7 +75,7 @@ func (s *SKA) Decrypt(ciphertext []byte) ([]byte, error) {
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(decodedCiphertext, decodedCiphertext)
 
-	return decodedCiphertext, nil
+	return unPadData(decodedCiphertext), nil
 }
 
 func generateKey(input string, AESKeyLength AESKeyLength) []byte {
@@ -106,7 +106,7 @@ func padData(data []byte, blockSize int) []byte {
 	return append(data, padText...)
 }
 
-func unpadData(data []byte) []byte {
+func unPadData(data []byte) []byte {
 	padding := int(data[len(data)-1])
 	return data[:len(data)-padding]
 }

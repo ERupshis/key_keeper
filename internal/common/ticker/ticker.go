@@ -15,7 +15,7 @@ import (
 // Parameters:
 //   - ticker: The time.Ticker specifying the intervals between callback invocations.
 //   - ctx: The context that, when canceled, triggers the termination of the callback execution.
-//   - callback: The function to be executed at each tick of the time.Ticker.
+//   - Callback: The function to be executed at each tick of the time.Ticker.
 func Run(ticker *time.Ticker, ctx context.Context, callback func()) {
 	for {
 		select {

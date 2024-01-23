@@ -2,7 +2,6 @@ package local
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -48,7 +47,6 @@ func (fm *FileManager) ScanRecord() (*data.Record, error) {
 		return nil, fmt.Errorf(errMsg, ErrFileIsNotOpen)
 	}
 
-	recordBytes = recordBytes[:bytes.LastIndexByte(recordBytes, '}')+1]
 	if err = json.Unmarshal(recordBytes, &record); err != nil {
 		return nil, fmt.Errorf(errMsg, err)
 	}

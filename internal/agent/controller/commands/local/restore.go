@@ -90,7 +90,7 @@ func (l *Local) statePassPhrase() (restoreState, string, error) {
 
 func (l *Local) stateStorageDecode(ctx context.Context, inmemory *inmemory.Storage, localStorage *local.FileManager, passPhrase string) (restoreState, error) {
 	localStorage.SetPassPhrase(passPhrase)
-	records, err := localStorage.RestoreUserData(ctx, passPhrase)
+	records, err := localStorage.RestoreUserData(ctx)
 	if err != nil {
 		l.iactr.Printf("failed to decode storage, reenter passphrase or '%s' to create new storage:\n", utils.CommandCancel)
 		return restorePassPhrase, nil

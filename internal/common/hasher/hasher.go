@@ -129,7 +129,7 @@ func hashMsg(hashFunc func() hash.Hash, msg []byte, key string) (string, error) 
 	return fmt.Sprintf("%x", hashVal), nil
 }
 
-// isRequestValid validates incoming message and compare incoming and calculated hashes.
+// isRequestValid validates incoming message and compares incoming and calculated hashes.
 func (hr *Hasher) isRequestValid(hashHeaderValue string, buffer bytes.Buffer) (bool, error) {
 	ok, err := hr.checkRequestHash(hashHeaderValue, buffer.Bytes())
 	if err != nil {
@@ -139,7 +139,7 @@ func (hr *Hasher) isRequestValid(hashHeaderValue string, buffer bytes.Buffer) (b
 	return ok, nil
 }
 
-// checkRequestHash validates incoming message and compare incoming and calculated hashes.
+// checkRequestHash validates incoming message and compares incoming and calculated hashes.
 func (hr *Hasher) checkRequestHash(hashHeaderValue string, body []byte) (bool, error) {
 	if hr.key == "" {
 		return true, nil

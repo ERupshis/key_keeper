@@ -40,7 +40,7 @@ func (b *Binary) addMainData(record *data.Record) error {
 	for currentState != addFinishState {
 		switch currentState {
 		case addInitialState:
-			currentState = b.stateInitial(record)
+			currentState = b.stateInitial()
 		case addFilePathState:
 			{
 				currentState, err = b.stateFilePath(record)
@@ -58,7 +58,7 @@ func (b *Binary) addMainData(record *data.Record) error {
 	return nil
 }
 
-func (b *Binary) stateInitial(record *data.Record) addState {
+func (b *Binary) stateInitial() addState {
 	b.iactr.Printf("enter absolute path to file: ")
 	return addFilePathState
 }

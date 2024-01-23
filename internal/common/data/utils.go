@@ -54,7 +54,7 @@ func getRecordValue(record *Record) interface{} {
 		}
 	}
 
-	return DataInvalid
+	return Invalid
 }
 
 func DeepCopyRecord(record *Record) *Record {

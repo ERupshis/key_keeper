@@ -86,7 +86,7 @@ func (fm *FileManager) SaveUserData(ctx context.Context, records []data.Record) 
 }
 
 // RestoreUserData reads user data from the file and restores it.
-func (fm *FileManager) RestoreUserData(ctx context.Context, passPhrase string) ([]data.Record, error) {
+func (fm *FileManager) RestoreUserData(ctx context.Context) ([]data.Record, error) {
 	if !fm.IsFileOpen() {
 		if err := fm.OpenFile(fm.path, false); err != nil {
 			return nil, fmt.Errorf("cannot open file '%s' to read user data: %w", fm.path, err)
