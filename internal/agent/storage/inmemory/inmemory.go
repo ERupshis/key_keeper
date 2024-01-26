@@ -1,17 +1,21 @@
 package inmemory
 
 import (
+	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
 type Storage struct {
 	records []models.Record
 
-	freeIdx int64
+	cryptHasher *ska.SKA
+	freeIdx     int64
 }
 
-func NewStorage() *Storage {
-	return &Storage{}
+func NewStorage(cryptHasher *ska.SKA) *Storage {
+	return &Storage{
+		cryptHasher: cryptHasher,
+	}
 }
 
 func (s *Storage) getNextFreeIdx() int64 {

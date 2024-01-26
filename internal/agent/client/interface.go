@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 
-	"github.com/erupshis/key_keeper/internal/common/models"
+	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
 )
 
 type BaseClient interface {
-	Push(ctx context.Context, records []models.Record) error
-	Pull(ctx context.Context, records []models.Record) error
+	Push(ctx context.Context, records []localModels.StorageRecord) error
+	Pull(ctx context.Context) (map[int64]localModels.StorageRecord, error)
 }

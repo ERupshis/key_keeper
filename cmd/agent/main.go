@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/erupshis/key_keeper/internal/agent/client"
 	"github.com/erupshis/key_keeper/internal/agent/config"
 	"github.com/erupshis/key_keeper/internal/agent/controller"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands"
@@ -82,7 +83,7 @@ func main() {
 	}
 	cmds := commands.NewCommands(userInteractor, &cmdConfig)
 
-	inMemoryStorage := inmemory.NewStorage()
+	inMemoryStorage := inmemory.NewStorage(dataCryptor)
 	localAutoSaveConfig := local.AutoSaveConfig{
 		SaveInterval:    cfg.LocalStoreInterval,
 		InMemoryStorage: inMemoryStorage,
@@ -94,6 +95,7 @@ func main() {
 	controllerConfig := controller.Config{
 		Inmemory:   inMemoryStorage,
 		Local:      localStorage,
+		Client:     client.NewDefault(cfg.ServerHost),
 		Interactor: userInteractor,
 		Cmds:       cmds,
 	}
@@ -105,11 +107,14 @@ func main() {
 
 	// shutdown.
 	idleConnsClosed := make(chan struct{})
-	sigCh := make(chan os.Signal, 1)
+	sigCh := make(chan os.Signal, 5)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		<-sigCh
 		cancel()
+		if err = mainController.SaveRecordsLocally(); err != nil {
+			logs.Infof("failed to save records locally: %v", err)
+		}
 		close(idleConnsClosed)
 	}()
 
@@ -119,5 +124,5 @@ func main() {
 	sigCh <- syscall.SIGQUIT
 
 	<-idleConnsClosed
-	logs.Infof("players service shutdown gracefully")
+	logs.Infof("agent shutdown gracefully")
 }
