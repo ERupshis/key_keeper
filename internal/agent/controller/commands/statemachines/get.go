@@ -236,7 +236,7 @@ func (s *StateMachines) getFilters() (map[string]string, error) {
 
 func (s *StateMachines) stateGetFiltersInitial() stateGetFilters {
 	fmt.Printf(
-		"enter filters through meta data(format: 'key%svalue') or '%s' or '%s': ",
+		"enter filters through meta models(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
 		utils.CommandContinue,

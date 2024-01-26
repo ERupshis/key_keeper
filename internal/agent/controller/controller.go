@@ -45,7 +45,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return c.saveRecordsLocally(ctx)
+			return c.saveRecordsLocally()
 		default:
 			commandParts, ok := c.iactr.ReadCommand()
 			if !ok {
@@ -65,7 +65,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 				c.cmds.Extract(commandParts, c.inmemory)
 			case utils.CommandExit:
 				c.iactr.Printf("Exit from app\n")
-				return c.saveRecordsLocally(ctx) // TODO: need to move in stop controller func.
+				return c.saveRecordsLocally()
 			default:
 				if len(commandParts) != 0 && commandParts[0] != "" {
 					c.iactr.Printf("Unknown command: '%s'\n", strings.Join(commandParts, " "))
@@ -75,14 +75,14 @@ func (c *Controller) Serve(ctx context.Context) error {
 	}
 }
 
-func (c *Controller) saveRecordsLocally(ctx context.Context) error {
+func (c *Controller) saveRecordsLocally() error {
 	errMsg := "save records locally: %w"
 	records, err := c.inmemory.GetAllRecords()
 	if err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	if err = c.local.SaveUserData(ctx, records); err != nil {
+	if err = c.local.SaveUserData(records); err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 

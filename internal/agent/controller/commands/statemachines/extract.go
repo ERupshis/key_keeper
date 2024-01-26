@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
 type stateExtract int
@@ -17,8 +17,8 @@ const (
 )
 
 type ExtractConfig struct {
-	Record   *data.Record
-	FileSave func(record *data.Record, savePath string) error
+	Record   *models.Record
+	FileSave func(record *models.Record, savePath string) error
 }
 
 func (s *StateMachines) Extract(cfg ExtractConfig) error {

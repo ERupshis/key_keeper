@@ -36,7 +36,7 @@ const (
 // checkFlags checks flags of app's launch.
 func checkFlags(config *Config) {
 	flag.StringVar(&config.LocalStoragePath, flagLocalStoragePath, "C:/key_keeper/data/", "folder for local storage")
-	flag.DurationVar(&config.LocalStoreInterval, flagLocalStoreInterval, 10*time.Second, "local store interval. 0 - means store on data change")
+	flag.DurationVar(&config.LocalStoreInterval, flagLocalStoreInterval, 10*time.Second, "local store interval. 0 - means store on models change")
 	flag.StringVar(&config.HashKey, flagHashKey, "", "hash key for binary files hash sum calculation")
 
 	flag.Parse()

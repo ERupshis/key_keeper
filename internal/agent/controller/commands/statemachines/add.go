@@ -8,7 +8,7 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
 type stateAdd int
@@ -20,8 +20,8 @@ const (
 )
 
 type AddConfig struct {
-	Record   *data.Record
-	MainData func(record *data.Record) error
+	Record   *models.Record
+	MainData func(record *models.Record) error
 }
 
 func (s *StateMachines) Add(cfg AddConfig) error {
@@ -70,7 +70,7 @@ var (
 	regexMetaData = regexp.MustCompile(`^(?:[a-zA-Z0-9]+ : .+|save)$`)
 )
 
-func (s *StateMachines) addMetaData(record *data.Record) error {
+func (s *StateMachines) addMetaData(record *models.Record) error {
 	currentState := addMetaInitialState
 
 	var err error
@@ -93,7 +93,7 @@ func (s *StateMachines) addMetaData(record *data.Record) error {
 
 func (s *StateMachines) stateMetaInitial() stateAddMeta {
 	fmt.Printf(
-		"enter meta data(format: 'key%svalue') or '%s' or '%s': ",
+		"enter meta models(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
 		utils.CommandSave,
@@ -101,11 +101,11 @@ func (s *StateMachines) stateMetaInitial() stateAddMeta {
 	return addMetaDataState
 }
 
-func (s *StateMachines) stateMetaData(record *data.Record) (stateAddMeta, error) {
+func (s *StateMachines) stateMetaData(record *models.Record) (stateAddMeta, error) {
 	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
-		fmt.Printf("entered metadata: %s\n", record.MetaData)
+		fmt.Printf("entered metadata: %s\n", record.Data.MetaData)
 		return addMetaFinishState, err
 	}
 
@@ -119,10 +119,10 @@ func (s *StateMachines) stateMetaData(record *data.Record) (stateAddMeta, error)
 
 	parts := strings.Split(metaData, utils.MetaSeparator)
 
-	if record.MetaData == nil {
-		record.MetaData = make(data.MetaData)
+	if record.Data.MetaData == nil {
+		record.Data.MetaData = make(models.MetaData)
 	}
 
-	record.MetaData[parts[0]] = parts[1]
+	record.Data.MetaData[parts[0]] = parts[1]
 	return addMetaInitialState, nil
 }

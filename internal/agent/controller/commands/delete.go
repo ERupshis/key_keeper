@@ -6,7 +6,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
 func (c *Commands) Delete(parts []string, storage *inmemory.Storage) {
@@ -49,7 +49,7 @@ func (c *Commands) findAndDeleteRecordByID(id int64, storage *inmemory.Storage) 
 	return c.confirmAndDeleteByID(&records[0], storage)
 }
 
-func (c *Commands) confirmAndDeleteByID(record *data.Record, storage *inmemory.Storage) error {
+func (c *Commands) confirmAndDeleteByID(record *models.Record, storage *inmemory.Storage) error {
 	confirmed, err := c.sm.Confirm(record, utils.CommandDelete)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandDelete, err)

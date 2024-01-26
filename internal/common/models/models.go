@@ -1,4 +1,4 @@
-package data
+package models
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ const (
 
 type RecordType = int32
 
-//go:generate easyjson -all data.go
+//go:generate easyjson -all models.go
 type Credential struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
@@ -46,7 +46,7 @@ type BankCard struct {
 }
 
 type Text struct {
-	Data string `json:"data"`
+	Data string `json:"models"`
 }
 
 type Binary struct {
@@ -56,23 +56,27 @@ type Binary struct {
 
 type MetaData map[string]string
 
-type Record struct {
-	ID          int64       `json:"id"`
+type Data struct {
 	RecordType  RecordType  `json:"record_type"`
 	MetaData    MetaData    `json:"meta_data,omitempty"`
 	Credentials *Credential `json:"credentials,omitempty"`
 	BankCard    *BankCard   `json:"bank_card,omitempty"`
 	Text        *Text       `json:"text,omitempty"`
 	Binary      *Binary     `json:"binary,omitempty"`
-	Deleted     bool        `json:"deleted"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+}
+
+type Record struct {
+	ID        int64     `json:"id"`
+	Data      Data      `json:"data"`
+	Deleted   bool      `json:"deleted"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (r Record) String() string {
 	formatBuilder := strings.Builder{}
 	formatBuilder.WriteString("{ID: %d,")
 
-	switch r.RecordType {
+	switch r.Data.RecordType {
 	case TypeCredentials:
 		formatBuilder.WriteString(" Credential: %+v,")
 	case TypeBankCard:
@@ -89,7 +93,7 @@ func (r Record) String() string {
 		formatBuilder.String(),
 		r.ID,
 		getRecordValue(&r),
-		r.MetaData,
+		r.Data.MetaData,
 	)
 }
 
@@ -97,7 +101,7 @@ func (r Record) TabString() string {
 	formatBuilder := strings.Builder{}
 	formatBuilder.WriteString("\tID: %d")
 
-	switch r.RecordType {
+	switch r.Data.RecordType {
 	case TypeCredentials:
 		formatBuilder.WriteString("\tCredential: %+v")
 	case TypeBankCard:
@@ -115,6 +119,6 @@ func (r Record) TabString() string {
 		formatBuilder.String(),
 		r.ID,
 		getRecordValue(&r),
-		r.MetaData,
+		r.Data.MetaData,
 	)
 }

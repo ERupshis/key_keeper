@@ -8,12 +8,12 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
-func (b *Binary) ProcessAddCommand(record *data.Record) error {
-	record.Binary = &data.Binary{}
-	record.RecordType = data.TypeBinary
+func (b *Binary) ProcessAddCommand(record *models.Record) error {
+	record.Data.Binary = &models.Binary{}
+	record.Data.RecordType = models.TypeBinary
 
 	cfg := statemachines.AddConfig{
 		Record:   record,
@@ -32,10 +32,10 @@ const (
 	addFinishState   = addState(2)
 )
 
-func (b *Binary) addMainData(record *data.Record) error {
+func (b *Binary) addMainData(record *models.Record) error {
 	currentState := addInitialState
 
-	currentLocalFile := record.Binary.SecuredFileName
+	currentLocalFile := record.Data.Binary.SecuredFileName
 	var err error
 	for currentState != addFinishState {
 		switch currentState {
@@ -63,8 +63,8 @@ func (b *Binary) stateInitial() addState {
 	return addFilePathState
 }
 
-func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
-	errMsg := "read anf secure binary data: %w"
+func (b *Binary) stateFilePath(record *models.Record) (addState, error) {
+	errMsg := "read anf secure binary models: %w"
 	pathToFile, ok, err := b.iactr.GetUserInputAndValidate(nil)
 	if !ok {
 		return addFilePathState, err
@@ -89,8 +89,8 @@ func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
 		return addFilePathState, fmt.Errorf(errMsg, err)
 	}
 
-	record.Binary.Name = filepath.Base(pathToFile)
-	record.Binary.SecuredFileName = hashSum
+	record.Data.Binary.Name = filepath.Base(pathToFile)
+	record.Data.Binary.SecuredFileName = hashSum
 
 	encryptedFileBytes, err := b.cryptor.Encrypt(fileBytes)
 	if err != nil {
@@ -102,7 +102,7 @@ func (b *Binary) stateFilePath(record *data.Record) (addState, error) {
 		return addFilePathState, fmt.Errorf(errMsg, err)
 	}
 
-	b.iactr.Printf("file saved: %+v\n", *record.Binary)
+	b.iactr.Printf("file saved: %+v\n", *record.Data.Binary)
 	return addFinishState, err
 }
 

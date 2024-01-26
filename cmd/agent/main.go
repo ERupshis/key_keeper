@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/erupshis/key_keeper/internal/agent/config"
 	"github.com/erupshis/key_keeper/internal/agent/controller"
@@ -100,8 +103,21 @@ func main() {
 	ctxWithCancel, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := mainController.Serve(ctxWithCancel); err != nil {
-		log.Fatalf("problem with controller: %v", err)
-	}
+	// shutdown.
+	idleConnsClosed := make(chan struct{})
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sigCh
+		cancel()
+		close(idleConnsClosed)
+	}()
 
+	if err = mainController.Serve(ctxWithCancel); err != nil && !errors.Is(err, context.Canceled) {
+		logs.Infof("problem with controller: %v", err)
+	}
+	sigCh <- syscall.SIGQUIT
+
+	<-idleConnsClosed
+	logs.Infof("players service shutdown gracefully")
 }

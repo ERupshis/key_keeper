@@ -1,11 +1,11 @@
 package inmemory
 
 import (
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/common/models"
 )
 
 type Storage struct {
-	records []data.Record
+	records []models.Record
 
 	freeIdx int64
 }

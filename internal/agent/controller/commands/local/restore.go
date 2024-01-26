@@ -97,7 +97,7 @@ func (l *Local) stateStorageDecode(ctx context.Context, inmemory *inmemory.Stora
 	}
 
 	if err = inmemory.AddRecords(records); err != nil {
-		return restoreStorageDecode, fmt.Errorf("write local storage data in memory: %w", err)
+		return restoreStorageDecode, fmt.Errorf("write local storage models in memory: %w", err)
 	}
 
 	return restoreFinishState, nil
