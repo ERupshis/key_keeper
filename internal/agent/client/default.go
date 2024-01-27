@@ -30,3 +30,7 @@ func (d *Default) Push(ctx context.Context, storageRecords []localModels.Storage
 func (d *Default) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, error) {
 	return nil, nil
 }
+
+func (d *Default) Close() error {
+	return nil
+}

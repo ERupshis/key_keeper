@@ -5,7 +5,7 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (c *Credential) ProcessAddCommand(record *models.Record) error {

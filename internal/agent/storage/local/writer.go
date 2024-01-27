@@ -7,7 +7,7 @@ import (
 	"os"
 
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 // fileWriter is responsible for writing user models into the file.

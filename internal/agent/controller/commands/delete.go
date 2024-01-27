@@ -6,7 +6,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (c *Commands) Delete(parts []string, storage *inmemory.Storage) {

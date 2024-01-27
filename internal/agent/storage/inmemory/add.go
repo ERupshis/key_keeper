@@ -3,7 +3,7 @@ package inmemory
 import (
 	"time"
 
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (s *Storage) AddRecord(record *models.Record) error {

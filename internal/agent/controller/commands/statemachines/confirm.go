@@ -7,7 +7,7 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 type stateConfirm int

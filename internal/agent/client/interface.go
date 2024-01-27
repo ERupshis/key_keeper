@@ -7,6 +7,7 @@ import (
 )
 
 type BaseClient interface {
-	Push(ctx context.Context, records []localModels.StorageRecord) error
+	Push(context.Context, []localModels.StorageRecord) error
 	Pull(ctx context.Context) (map[int64]localModels.StorageRecord, error)
+	Close() error
 }

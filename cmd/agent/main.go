@@ -23,9 +23,13 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
+	"github.com/erupshis/key_keeper/internal/common/grpc/interceptors/logging"
 	"github.com/erupshis/key_keeper/internal/common/hasher"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 var (
@@ -92,10 +96,25 @@ func main() {
 
 	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, userInteractor, &localAutoSaveConfig, dataCryptor)
 
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(opts, grpc.WithChainUnaryInterceptor(
+		logging.UnaryClient(logs),
+	))
+	opts = append(opts, grpc.WithChainStreamInterceptor(
+		logging.StreamClient(logs),
+	))
+	opts = append(opts, grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)))
+	grpcClient, err := client.NewGRPC(cfg.ServerHost, opts...)
+	defer deferutils.ExecWithLogError(grpcClient.Close, logs)
+	if err != nil {
+		logs.Fatalf("client: %v", err)
+	}
+
 	controllerConfig := controller.Config{
 		Inmemory:   inMemoryStorage,
 		Local:      localStorage,
-		Client:     client.NewDefault(cfg.ServerHost),
+		Client:     grpcClient,
 		Interactor: userInteractor,
 		Cmds:       cmds,
 	}

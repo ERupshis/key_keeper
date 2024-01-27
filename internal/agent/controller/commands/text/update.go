@@ -2,7 +2,7 @@ package text
 
 import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (t *Text) ProcessUpdateCommand(record *models.Record) error {

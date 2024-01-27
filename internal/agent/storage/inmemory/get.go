@@ -1,7 +1,7 @@
 package inmemory
 
 import (
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (s *Storage) GetRecord(id int64) (*models.Record, error) {

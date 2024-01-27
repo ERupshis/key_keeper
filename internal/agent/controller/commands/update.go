@@ -6,7 +6,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	models2 "github.com/erupshis/key_keeper/internal/models"
 )
 
 func (c *Commands) Update(parts []string, storage *inmemory.Storage) {
@@ -46,16 +46,16 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 		return nil
 	}
 
-	tmpRecord := models.DeepCopyRecord(&records[0])
-	tmpRecord.Data.MetaData = make(models.MetaData)
+	tmpRecord := models2.DeepCopyRecord(&records[0])
+	tmpRecord.Data.MetaData = make(models2.MetaData)
 	switch records[0].Data.RecordType {
-	case models.TypeBankCard:
+	case models2.TypeBankCard:
 		err = c.bc.ProcessUpdateCommand(tmpRecord)
-	case models.TypeCredentials:
+	case models2.TypeCredentials:
 		err = c.bc.ProcessUpdateCommand(tmpRecord)
-	case models.TypeText:
+	case models2.TypeText:
 		err = c.text.ProcessUpdateCommand(tmpRecord)
-	case models.TypeBinary:
+	case models2.TypeBinary:
 		err = c.binary.ProcessUpdateCommand(tmpRecord)
 	default:
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, errs.ErrIncorrectRecordType)
@@ -68,7 +68,7 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 	return c.confirmAndUpdateRecordByID(tmpRecord, storage)
 }
 
-func (c *Commands) confirmAndUpdateRecordByID(record *models.Record, storage *inmemory.Storage) error {
+func (c *Commands) confirmAndUpdateRecordByID(record *models2.Record, storage *inmemory.Storage) error {
 	confirmed, err := c.sm.Confirm(record, utils.CommandUpdate)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)

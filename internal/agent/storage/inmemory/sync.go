@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 func (s *Storage) GetAllRecordsForServer() ([]localModels.StorageRecord, error) {

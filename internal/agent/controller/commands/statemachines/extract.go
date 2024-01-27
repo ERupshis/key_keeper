@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 type stateExtract int
