@@ -12,9 +12,9 @@ func (c *Commands) Push(ctx context.Context, client client.BaseClient, inmemory 
 
 	storageRecords, err := inmemory.GetAllRecordsForServer()
 	if err != nil {
-		c.iactr.Printf("failed to extract records for push on server: %v", err)
+		c.iactr.Printf("failed to extract records for push on server: %v\n", err)
 	}
 	if err = client.Push(ctx, storageRecords); err != nil {
-		c.iactr.Printf("failed to push records on server: %v", err)
+		c.iactr.Printf("failed to push records on server: %v\n", err)
 	}
 }

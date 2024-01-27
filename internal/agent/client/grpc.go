@@ -6,6 +6,7 @@ import (
 	"io"
 
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
+	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -44,15 +45,12 @@ func (g *GRPC) Push(ctx context.Context, storageRecords []localModels.StorageRec
 		return fmt.Errorf("push records: %w", err)
 	}
 
-	defer func() {
-		_ = stream.CloseSend()
-	}()
+	defer deferutils.ExecSilent(stream.CloseSend)
 
 	for _, record := range storageRecords {
 		record := record
 		err = stream.Send(&pb.PushRequest{Record: localModels.ConvertStorageRecordToGRPC(&record)})
 		if err != nil {
-			// TODO: collect all errors?
 			return fmt.Errorf("send record: %w", err)
 		}
 	}
@@ -67,15 +65,21 @@ func (g *GRPC) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, e
 	}
 
 	res := make(map[int64]localModels.StorageRecord)
+
+	tmpReceive := &pb.PullResponse{}
 	for {
-		received, err := stream.Recv()
-		if err != io.EOF {
+		tmpReceive, err = stream.Recv()
+		if err != nil {
 			break
 		}
-		// TODO: collect all errors?
-		record := localModels.ConvertStorageRecordFromGRPC(received.GetRecord())
+
+		record := localModels.ConvertStorageRecordFromGRPC(tmpReceive.GetRecord())
 		res[record.ID] = *record
 	}
 
-	return res, nil
+	if err == io.EOF {
+		return res, nil
+	}
+
+	return nil, fmt.Errorf("receive record: %w", err)
 }

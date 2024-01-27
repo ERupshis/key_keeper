@@ -68,6 +68,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 			case utils.CommandGet:
 				c.cmds.Get(commandParts, c.inmemory)
 			case utils.CommandPull:
+				c.cmds.Pull(ctx, c.client, c.inmemory)
 			case utils.CommandPush:
 				c.cmds.Push(ctx, c.client, c.inmemory)
 			case utils.CommandUpdate:

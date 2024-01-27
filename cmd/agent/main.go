@@ -106,10 +106,10 @@ func main() {
 	))
 	opts = append(opts, grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)))
 	grpcClient, err := client.NewGRPC(cfg.ServerHost, opts...)
-	defer deferutils.ExecWithLogError(grpcClient.Close, logs)
 	if err != nil {
 		logs.Fatalf("client: %v", err)
 	}
+	defer deferutils.ExecWithLogError(grpcClient.Close, logs)
 
 	controllerConfig := controller.Config{
 		Inmemory:   inMemoryStorage,
