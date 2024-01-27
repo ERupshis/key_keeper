@@ -12,7 +12,8 @@ import (
 
 // Config agent's settings.
 type Config struct {
-	Host string
+	Host        string
+	DatabaseDSN string
 }
 
 // Parse main func to parse variables.
@@ -25,12 +26,14 @@ func Parse() (Config, error) {
 
 // FLAGS PARSING.
 const (
-	flagServerHost = "addr"
+	flagServerHost  = "addr"
+	flagDatabaseDSN = "rec_dsn"
 )
 
 // checkFlags checks flags of app's launch.
 func checkFlags(config *Config) {
 	flag.StringVar(&config.Host, flagServerHost, ":8081", "server host")
+	flag.StringVar(&config.DatabaseDSN, flagDatabaseDSN, "postgres://postgres:postgres@localhost:5432/key_db?sslmode=disable", "records database DSN")
 
 	flag.Parse()
 }
@@ -38,7 +41,8 @@ func checkFlags(config *Config) {
 // ENVIRONMENTS PARSING.
 // envConfig struct of environments suitable for agent.
 type envConfig struct {
-	Host string `env:"HOST"`
+	Host        string `env:"HOST"`
+	DatabaseDSN string `env:"DATABASE_DSN"`
 }
 
 // checkEnvironments checks environments suitable for agent.
@@ -51,6 +55,7 @@ func checkEnvironments(config *Config) error {
 
 	var errs []error
 	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.Host, envs.Host))
+	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.DatabaseDSN, envs.DatabaseDSN))
 
 	resErr := errors.Join(errs...)
 	if resErr != nil {

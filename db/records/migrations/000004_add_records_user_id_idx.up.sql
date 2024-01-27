@@ -1,0 +1,1 @@
+CREATE INDEX records_user_id_idx ON records(user_id);

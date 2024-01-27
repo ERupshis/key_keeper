@@ -8,14 +8,21 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/erupshis/key_keeper/internal/common/db"
 	"github.com/erupshis/key_keeper/internal/common/grpc/interceptors/logging"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 	"github.com/erupshis/key_keeper/internal/server"
 	"github.com/erupshis/key_keeper/internal/server/config"
+	"github.com/erupshis/key_keeper/internal/server/storage/postgres"
 	"github.com/erupshis/key_keeper/internal/server/sync"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	_ "google.golang.org/grpc/encoding/gzip"
+)
+
+const (
+	migrationsFolder = "file://db/records/migrations/"
 )
 
 func main() {
@@ -30,12 +37,25 @@ func main() {
 		logs.Fatalf("parse config: %v", err)
 	}
 
+	ctxWithCancel, cancel := context.WithCancel(context.Background())
+	// storage.
+	dbConfig := db.Config{
+		DSN:              cfg.DatabaseDSN,
+		MigrationsFolder: migrationsFolder,
+	}
+	databaseConn, err := db.NewConnection(ctxWithCancel, dbConfig)
+	if err != nil {
+		logs.Fatalf("failed to connect to users database: %v", err)
+	}
+
+	recordsStorage := postgres.NewPostgres(databaseConn, logs)
+
 	// handlers controller.
-	syncController := sync.NewController()
+	syncController := sync.NewController(recordsStorage)
 
 	// gRPC server options.
 	var opts []grpc.ServerOption
-	// opts = append(opts, grpc.Creds(insecure.NewCredentials()))
+	opts = append(opts, grpc.Creds(insecure.NewCredentials()))
 	opts = append(opts, grpc.ChainUnaryInterceptor(logging.UnaryServer(logs)))
 	opts = append(opts, grpc.ChainStreamInterceptor(logging.StreamServer(logs)))
 	// gRPC server
@@ -53,8 +73,6 @@ func main() {
 			return
 		}
 	}()
-
-	ctxWithCancel, cancel := context.WithCancel(context.Background())
 
 	// shutdown.
 	idleConnsClosed := make(chan struct{})
