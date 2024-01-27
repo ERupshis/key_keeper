@@ -1,28 +1,27 @@
-package logging
+package logger
 
 import (
 	"context"
 
-	"github.com/erupshis/key_keeper/internal/common/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func StreamServer(logger logger.BaseLogger) grpc.StreamServerInterceptor {
+func StreamServer(logger BaseLogger) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		logger.Infof("Stream method %s called", info.FullMethod)
 
 		err := handler(srv, ss)
 		if err != nil {
-			logger.Infof("grpc stream: %v", err)
+			logger.Infof("authgrpc stream: %v", err)
 		}
 
 		return err
 	}
 }
 
-func UnaryServer(logger logger.BaseLogger) grpc.UnaryServerInterceptor {
+func UnaryServer(logger BaseLogger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		logger.Infof("Unary method %s called", info.FullMethod)
 
@@ -43,7 +42,7 @@ func UnaryServer(logger logger.BaseLogger) grpc.UnaryServerInterceptor {
 	}
 }
 
-func StreamClient(logger logger.BaseLogger) grpc.StreamClientInterceptor {
+func StreamClient(logger BaseLogger) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 		logger.Infof("Stream method %s called", method)
 
@@ -58,7 +57,7 @@ func StreamClient(logger logger.BaseLogger) grpc.StreamClientInterceptor {
 	}
 }
 
-func UnaryClient(logger logger.BaseLogger) grpc.UnaryClientInterceptor {
+func UnaryClient(logger BaseLogger) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		logger.Infof("Unary method %s called", method)
 

@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v4 v4.18.1

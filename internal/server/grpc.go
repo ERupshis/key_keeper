@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 
+	"github.com/erupshis/key_keeper/internal/server/auth"
 	"github.com/erupshis/key_keeper/internal/server/sync"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc"
@@ -19,9 +20,10 @@ type Server struct {
 	port string
 }
 
-func NewGRPCServer(syncController *sync.Controller, info string, options ...grpc.ServerOption) *Server {
+func NewGRPCServer(syncController *sync.Controller, authController *auth.Controller, info string, options ...grpc.ServerOption) *Server {
 	s := grpc.NewServer(options...)
 	pb.RegisterSyncServer(s, syncController)
+	pb.RegisterAuthServer(s, authController)
 
 	srv := &Server{
 		Server: s,

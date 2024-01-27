@@ -23,7 +23,6 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
-	"github.com/erupshis/key_keeper/internal/common/grpc/interceptors/logging"
 	"github.com/erupshis/key_keeper/internal/common/hasher"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
@@ -99,10 +98,10 @@ func main() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	opts = append(opts, grpc.WithChainUnaryInterceptor(
-		logging.UnaryClient(logs),
+		logger.UnaryClient(logs),
 	))
 	opts = append(opts, grpc.WithChainStreamInterceptor(
-		logging.StreamClient(logs),
+		logger.StreamClient(logs),
 	))
 	opts = append(opts, grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)))
 	grpcClient, err := client.NewGRPC(cfg.ServerHost, opts...)

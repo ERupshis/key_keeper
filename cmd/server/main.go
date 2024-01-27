@@ -8,11 +8,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	authCommon "github.com/erupshis/key_keeper/internal/common/auth"
+	"github.com/erupshis/key_keeper/internal/common/auth/authgrpc"
+	authPostgres "github.com/erupshis/key_keeper/internal/common/auth/storage/postgres"
 	"github.com/erupshis/key_keeper/internal/common/db"
-	"github.com/erupshis/key_keeper/internal/common/grpc/interceptors/logging"
+	"github.com/erupshis/key_keeper/internal/common/hasher"
+	"github.com/erupshis/key_keeper/internal/common/jwtgenerator"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 	"github.com/erupshis/key_keeper/internal/server"
+	"github.com/erupshis/key_keeper/internal/server/auth"
 	"github.com/erupshis/key_keeper/internal/server/config"
 	"github.com/erupshis/key_keeper/internal/server/storage/postgres"
 	"github.com/erupshis/key_keeper/internal/server/sync"
@@ -22,7 +27,7 @@ import (
 )
 
 const (
-	migrationsFolder = "file://db/records/migrations/"
+	migrationsFolder = "file://db/migrations/"
 )
 
 func main() {
@@ -53,13 +58,33 @@ func main() {
 	// handlers controller.
 	syncController := sync.NewController(recordsStorage)
 
+	// jwt tokens.
+	jwtGenerator, err := jwtgenerator.NewJWTGenerator(cfg.JWT, 2)
+
+	// auth.
+	hash := hasher.CreateHasher(cfg.HashKey, hasher.TypeSHA256, logs)
+	authStorage := authPostgres.NewPostgres(databaseConn, logs)
+	authManagerConfig := &authCommon.Config{
+		Storage: authStorage,
+		JWT:     jwtGenerator,
+		Hasher:  hash,
+	}
+	authManager := authCommon.NewManager(authManagerConfig)
+	authController := auth.NewController(authManager)
+
 	// gRPC server options.
 	var opts []grpc.ServerOption
 	opts = append(opts, grpc.Creds(insecure.NewCredentials()))
-	opts = append(opts, grpc.ChainUnaryInterceptor(logging.UnaryServer(logs)))
-	opts = append(opts, grpc.ChainStreamInterceptor(logging.StreamServer(logs)))
+	opts = append(opts, grpc.ChainUnaryInterceptor(
+		logger.UnaryServer(logs),
+		authgrpc.UnaryServer(jwtGenerator, logs),
+	))
+	opts = append(opts, grpc.ChainStreamInterceptor(
+		logger.StreamServer(logs),
+		authgrpc.StreamServer(jwtGenerator, logs),
+	))
 	// gRPC server
-	srv := server.NewGRPCServer(syncController, "grpc", opts...)
+	srv := server.NewGRPCServer(syncController, authController, "grpc", opts...)
 	srv.Host(cfg.Host)
 
 	go func() {

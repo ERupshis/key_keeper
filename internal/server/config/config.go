@@ -14,6 +14,8 @@ import (
 type Config struct {
 	Host        string
 	DatabaseDSN string
+	JWT         string
+	HashKey     string
 }
 
 // Parse main func to parse variables.
@@ -27,13 +29,17 @@ func Parse() (Config, error) {
 // FLAGS PARSING.
 const (
 	flagServerHost  = "addr"
-	flagDatabaseDSN = "rec_dsn"
+	flagDatabaseDSN = "rdsn"
+	flagJWT         = "jwt"
+	flagHashKey     = "hk"
 )
 
 // checkFlags checks flags of app's launch.
 func checkFlags(config *Config) {
 	flag.StringVar(&config.Host, flagServerHost, ":8081", "server host")
 	flag.StringVar(&config.DatabaseDSN, flagDatabaseDSN, "postgres://postgres:postgres@localhost:5432/key_db?sslmode=disable", "records database DSN")
+	flag.StringVar(&config.JWT, flagJWT, "SECRET_KEY", "jwt token generation key")
+	flag.StringVar(&config.HashKey, flagHashKey, "SECRET_KEY", "user passwords hasher key")
 
 	flag.Parse()
 }
@@ -43,6 +49,8 @@ func checkFlags(config *Config) {
 type envConfig struct {
 	Host        string `env:"HOST"`
 	DatabaseDSN string `env:"DATABASE_DSN"`
+	JWT         string `env:"JWT_KEY"`
+	HashKey     string `env:"HASH_KEY"`
 }
 
 // checkEnvironments checks environments suitable for agent.
@@ -56,6 +64,8 @@ func checkEnvironments(config *Config) error {
 	var errs []error
 	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.Host, envs.Host))
 	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.DatabaseDSN, envs.DatabaseDSN))
+	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.JWT, envs.JWT))
+	errs = append(errs, configutils.SetEnvToParamIfNeed(&config.HashKey, envs.HashKey))
 
 	resErr := errors.Join(errs...)
 	if resErr != nil {
