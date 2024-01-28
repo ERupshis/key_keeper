@@ -2,17 +2,12 @@ package jwtgenerator
 
 import (
 	"testing"
-
-	"github.com/erupshis/key_keeper/internal/common/logger"
 )
 
 func TestJwtGenerator_Overall(t *testing.T) {
-	log := logger.CreateMock()
-
 	type fields struct {
 		jwtKey   string
 		tokenExp int
-		log      logger.BaseLogger
 	}
 	type args struct {
 		tokenStringSuffix string
@@ -30,7 +25,6 @@ func TestJwtGenerator_Overall(t *testing.T) {
 			fields: fields{
 				jwtKey:   "secret",
 				tokenExp: 1,
-				log:      log,
 			},
 			args: args{
 				userID: 3,
@@ -43,7 +37,6 @@ func TestJwtGenerator_Overall(t *testing.T) {
 			fields: fields{
 				jwtKey:   "secret",
 				tokenExp: 0,
-				log:      log,
 			},
 			args: args{
 				userID: 3,
@@ -56,7 +49,6 @@ func TestJwtGenerator_Overall(t *testing.T) {
 			fields: fields{
 				jwtKey:   "secret",
 				tokenExp: 0,
-				log:      log,
 			},
 			args: args{
 				tokenStringSuffix: "af10",
@@ -71,7 +63,6 @@ func TestJwtGenerator_Overall(t *testing.T) {
 			j := &JwtGenerator{
 				jwtKey:   tt.fields.jwtKey,
 				tokenExp: tt.fields.tokenExp,
-				log:      tt.fields.log,
 			}
 			tokenString, err := j.BuildJWTString(tt.args.userID)
 			if (err != nil) != tt.wantErr {

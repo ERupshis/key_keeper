@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/common/auth/models"
+	"github.com/erupshis/key_keeper/internal/common/auth/storage"
 	"github.com/erupshis/key_keeper/internal/common/db"
 	"github.com/erupshis/key_keeper/internal/common/retrier"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
@@ -26,7 +27,7 @@ func (p *Postgres) GetUserByLogin(ctx context.Context, login string) (*models.Us
 	}
 
 	if len(users) != 1 {
-		return nil, fmt.Errorf("couldn't to find user '%s': %w", login, err)
+		return nil, storage.ErrUserNotFound
 	}
 
 	return &users[0], nil

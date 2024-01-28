@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/common/auth/models"
@@ -36,7 +37,7 @@ func NewManager(cfg *Config) *Manager {
 	}
 }
 
-func (m *Manager) Login(ctx context.Context, user models.User) (string, error) {
+func (m *Manager) Login(ctx context.Context, user *models.User) (string, error) {
 	userData, err := m.storage.GetUserByLogin(ctx, user.Login)
 	if err != nil {
 		return "", fmt.Errorf("check user in db by login: %w", err)
@@ -48,24 +49,24 @@ func (m *Manager) Login(ctx context.Context, user models.User) (string, error) {
 	}
 
 	if userData.Password != hashedPwd {
-		return "", fmt.Errorf("passwork missmatch")
+		return "", ErrMismatchPassword
 	}
 
 	token, err := m.jwt.BuildJWTString(user.ID)
 	if err != nil {
 		return "", fmt.Errorf("create session token: %w", err)
 	}
-	return token, nil
+	return addBearerPrefix(token), nil
 }
 
 func (m *Manager) Register(ctx context.Context, user *models.User) error {
 	userData, err := m.storage.GetUserByLogin(ctx, user.Login)
-	if err != nil {
+	if err != nil && !errors.Is(err, storage.ErrUserNotFound) {
 		return fmt.Errorf("check user in db by login: %w", err)
 	}
 
 	if userData != nil {
-		return fmt.Errorf("login already occupied")
+		return ErrLoginOccupied
 	}
 
 	user.Password, err = m.hasher.HashMsg([]byte(user.Password))

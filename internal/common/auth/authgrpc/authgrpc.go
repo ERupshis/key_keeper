@@ -14,6 +14,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var (
+	procExclusions = map[string]struct{}{
+		"Auth/Login":    struct{}{},
+		"Auth/Register": struct{}{},
+	}
+)
+
 func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) error {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -42,8 +49,10 @@ func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) error {
 
 func StreamServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		if err := Authorize(ss.Context(), jwt); err != nil {
-			return err
+		if _, ok := procExclusions[strings.Split(info.FullMethod, ".")[1]]; !ok {
+			if err := Authorize(ss.Context(), jwt); err != nil {
+				return err
+			}
 		}
 
 		return handler(srv, ss)
@@ -52,8 +61,10 @@ func StreamServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc
 
 func UnaryServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		if err := Authorize(ctx, jwt); err != nil {
-			return nil, err
+		if _, ok := procExclusions[strings.Split(info.FullMethod, ".")[1]]; !ok {
+			if err := Authorize(ctx, jwt); err != nil {
+				return nil, err
+			}
 		}
 
 		return handler(ctx, req)
