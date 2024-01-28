@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	TokenHeader = "Authorization"
-	TokenType   = "Bearer "
+	TokenHeader = "authorization"
+	TokenType   = "Bearer"
 	UserID      = "user_id"
 )
 
@@ -52,7 +52,7 @@ func (m *Manager) Login(ctx context.Context, user *models.User) (string, error) 
 		return "", ErrMismatchPassword
 	}
 
-	token, err := m.jwt.BuildJWTString(user.ID)
+	token, err := m.jwt.BuildJWTString(userData.ID)
 	if err != nil {
 		return "", fmt.Errorf("create session token: %w", err)
 	}

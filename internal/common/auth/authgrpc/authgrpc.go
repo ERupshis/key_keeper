@@ -27,14 +27,17 @@ func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) error {
 		return status.Error(codes.Unauthenticated, "missing metadata")
 	}
 
-	authHeaders, ok := md[auth.TokenHeader]
-	if !ok || len(authHeaders) == 0 {
+	authHeader, ok := md[auth.TokenHeader]
+	if !ok || len(authHeader) == 0 {
 		return status.Error(codes.Unauthenticated, "missing token in metadata")
 	}
 
-	token := strings.TrimSpace(authHeaders[0])
+	token := strings.Split(authHeader[0], " ")
+	if len(token) != 2 || token[0] != auth.TokenType {
+		return status.Error(codes.InvalidArgument, "incorrect authorization data")
+	}
 
-	userID, err := jwt.GetUserID(token)
+	userID, err := jwt.GetUserID(token[1])
 	if err != nil {
 		return status.Errorf(codes.Unauthenticated, "jwt validation: %v", err)
 	}
@@ -49,7 +52,8 @@ func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) error {
 
 func StreamServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		if _, ok := procExclusions[strings.Split(info.FullMethod, ".")[1]]; !ok {
+		procName := info.FullMethod[strings.LastIndex(info.FullMethod, ".")+1:]
+		if _, ok := procExclusions[procName]; !ok {
 			if err := Authorize(ss.Context(), jwt); err != nil {
 				return err
 			}
@@ -61,7 +65,8 @@ func StreamServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc
 
 func UnaryServer(jwt *jwtgenerator.JwtGenerator, logger logger.BaseLogger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		if _, ok := procExclusions[strings.Split(info.FullMethod, ".")[1]]; !ok {
+		procName := info.FullMethod[strings.LastIndex(info.FullMethod, ".")+1:]
+		if _, ok := procExclusions[procName]; !ok {
 			if err := Authorize(ctx, jwt); err != nil {
 				return nil, err
 			}
