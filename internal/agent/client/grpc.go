@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 
+	clientModels "github.com/erupshis/key_keeper/internal/agent/client/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
+	"github.com/erupshis/key_keeper/internal/models"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -17,8 +19,9 @@ var (
 )
 
 type GRPC struct {
-	client pb.SyncClient
-	conn   *grpc.ClientConn
+	syncClient pb.SyncClient
+	authClient pb.AuthClient
+	conn       *grpc.ClientConn
 }
 
 func NewGRPC(address string, options ...grpc.DialOption) (BaseClient, error) {
@@ -27,11 +30,13 @@ func NewGRPC(address string, options ...grpc.DialOption) (BaseClient, error) {
 		return nil, fmt.Errorf("create connection to server: %w", err)
 	}
 
-	client := pb.NewSyncClient(conn)
+	syncClient := pb.NewSyncClient(conn)
+	authClient := pb.NewAuthClient(conn)
 
 	return &GRPC{
-		client: client,
-		conn:   conn,
+		syncClient: syncClient,
+		authClient: authClient,
+		conn:       conn,
 	}, nil
 }
 
@@ -39,8 +44,26 @@ func (g *GRPC) Close() error {
 	return g.conn.Close()
 }
 
+func (g *GRPC) Login(ctx context.Context, creds *models.Credential) error {
+	_, err := g.authClient.Login(ctx, &pb.LoginRequest{Creds: clientModels.ConvertCredentialToGRPC(creds)})
+	if err != nil {
+		return fmt.Errorf("login: %w", err)
+	}
+
+	return nil
+}
+
+func (g *GRPC) Register(ctx context.Context, creds *models.Credential) error {
+	_, err := g.authClient.Register(ctx, &pb.RegisterRequest{Creds: clientModels.ConvertCredentialToGRPC(creds)})
+	if err != nil {
+		return fmt.Errorf("register: %w", err)
+	}
+
+	return nil
+}
+
 func (g *GRPC) Push(ctx context.Context, storageRecords []localModels.StorageRecord) error {
-	stream, err := g.client.Push(ctx)
+	stream, err := g.syncClient.Push(ctx)
 	if err != nil {
 		return fmt.Errorf("push records: %w", err)
 	}
@@ -49,7 +72,7 @@ func (g *GRPC) Push(ctx context.Context, storageRecords []localModels.StorageRec
 
 	for _, record := range storageRecords {
 		record := record
-		err = stream.Send(&pb.PushRequest{Record: localModels.ConvertStorageRecordToGRPC(&record)})
+		err = stream.Send(&pb.PushRequest{Record: clientModels.ConvertStorageRecordToGRPC(&record)})
 		if err != nil {
 			return fmt.Errorf("send record: %w", err)
 		}
@@ -59,7 +82,7 @@ func (g *GRPC) Push(ctx context.Context, storageRecords []localModels.StorageRec
 }
 
 func (g *GRPC) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, error) {
-	stream, err := g.client.Pull(ctx, &emptypb.Empty{})
+	stream, err := g.syncClient.Pull(ctx, &emptypb.Empty{})
 	if err != nil {
 		return nil, fmt.Errorf("pull records: %w", err)
 	}
@@ -73,7 +96,7 @@ func (g *GRPC) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, e
 			break
 		}
 
-		record := localModels.ConvertStorageRecordFromGRPC(tmpReceive.GetRecord())
+		record := clientModels.ConvertStorageRecordFromGRPC(tmpReceive.GetRecord())
 		res[record.ID] = *record
 	}
 

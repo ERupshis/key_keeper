@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Commands) Server(ctx context.Context, parts []string, storage *inmemory.Storage) {
-	supportedTypes := []string{utils.CommandPush, utils.CommandPull}
+	supportedTypes := []string{utils.CommandPush, utils.CommandPull, utils.CommandLogin, utils.CommandRegister}
 	if len(parts) != 2 {
 		c.iactr.Printf("incorrect request. should contain command '%s' and action type(%s)\n", utils.CommandServer, supportedTypes)
 		return
@@ -31,6 +31,10 @@ func (c *Commands) handleServer(ctx context.Context, actionType string) error {
 		err = c.server.ProcessPushCommand(ctx)
 	case utils.CommandPull:
 		err = c.server.ProcessPullCommand(ctx)
+	case utils.CommandLogin:
+		err = c.server.ProcessLoginCommand(ctx)
+	case utils.CommandRegister:
+		err = c.server.ProcessRegisterCommand(ctx)
 	default:
 		err = fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandServer, errs.ErrIncorrectServerActionType)
 	}

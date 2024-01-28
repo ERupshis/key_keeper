@@ -47,7 +47,7 @@ func (c *Credential) addMainData(record *models.Record) error {
 			}
 		case addPasswordState:
 			{
-				currentState, err = c.stateExpiration(record)
+				currentState, err = c.statePassword(record)
 				if err != nil {
 					return err
 				}
@@ -80,7 +80,7 @@ func (c *Credential) stateLogin(record *models.Record) (addState, error) {
 
 }
 
-func (c *Credential) stateExpiration(record *models.Record) (addState, error) {
+func (c *Credential) statePassword(record *models.Record) (addState, error) {
 	credPassword, ok, err := c.iactr.GetUserInputAndValidate(nil)
 	record.Data.Credentials.Password = credPassword
 	if !ok {

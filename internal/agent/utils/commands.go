@@ -8,11 +8,14 @@ const (
 	CommandExit     = "exit"
 	CommandExtract  = "extract"
 	CommandGet      = "get"
-	CommandPull     = "pull"
-	CommandPush     = "push"
 	CommandSave     = "save"
 	CommandServer   = "server"
 	CommandUpdate   = "update"
+
+	CommandLogin    = "login"
+	CommandPull     = "pull"
+	CommandPush     = "push"
+	CommandRegister = "register"
 
 	CommandFilters = "filters"
 	CommandID      = "id"

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
+	"github.com/erupshis/key_keeper/internal/models"
 )
 
 var (
@@ -21,6 +22,14 @@ func NewDefault(host string) BaseClient {
 		client: http.DefaultClient,
 		host:   host,
 	}
+}
+
+func (d *Default) Login(ctx context.Context, creds *models.Credential) error {
+	return nil
+}
+
+func (d *Default) Register(ctx context.Context, creds *models.Credential) error {
+	return nil
 }
 
 func (d *Default) Push(ctx context.Context, storageRecords []localModels.StorageRecord) error {

@@ -77,11 +77,11 @@ func main() {
 	opts = append(opts, grpc.Creds(insecure.NewCredentials()))
 	opts = append(opts, grpc.ChainUnaryInterceptor(
 		logger.UnaryServer(logs),
-		authgrpc.UnaryServer(jwtGenerator, logs),
+		authgrpc.UnaryServer(jwtGenerator),
 	))
 	opts = append(opts, grpc.ChainStreamInterceptor(
 		logger.StreamServer(logs),
-		authgrpc.StreamServer(jwtGenerator, logs),
+		authgrpc.StreamServer(jwtGenerator),
 	))
 	// gRPC server
 	srv := server.NewGRPCServer(syncController, authController, "grpc", opts...)

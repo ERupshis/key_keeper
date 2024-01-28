@@ -6,11 +6,12 @@ import (
 	"io"
 	"strconv"
 
-	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
+	clientModels "github.com/erupshis/key_keeper/internal/agent/client/models"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 	"github.com/erupshis/key_keeper/internal/server/storage"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -48,7 +49,7 @@ func (c *Controller) Push(stream pb.Sync_PushServer) error {
 			break
 		}
 
-		record := localModels.ConvertStorageRecordFromGRPC(tmpReceive.GetRecord())
+		record := clientModels.ConvertStorageRecordFromGRPC(tmpReceive.GetRecord())
 		if err = c.storage.UpsertRecord(stream.Context(), userID, record); err != nil {
 			break
 		}
@@ -69,7 +70,7 @@ func (c *Controller) Pull(_ *emptypb.Empty, stream pb.Sync_PullServer) error {
 
 	records, err := c.storage.GetRecords(stream.Context(), userID)
 	for idx := range records {
-		err = stream.Send(&pb.PullResponse{Record: localModels.ConvertStorageRecordToGRPC(&records[idx])})
+		err = stream.Send(&pb.PullResponse{Record: clientModels.ConvertStorageRecordToGRPC(&records[idx])})
 		if err != nil {
 			return status.Errorf(codes.Internal, "send record: %v", err)
 		}
@@ -85,12 +86,17 @@ func (c *Controller) PullBinary(_ *emptypb.Empty, _ pb.Sync_PullBinaryServer) er
 }
 
 func getUserID(ctx context.Context) (int64, error) {
-	rawUserID := ctx.Value(metaUserID)
-	if rawUserID == "" {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return -1, fmt.Errorf("invalid context")
+	}
+
+	rawUserID := md.Get(metaUserID)
+	if len(rawUserID) == 0 || rawUserID[0] == "" {
 		return -1, status.Errorf(codes.Unauthenticated, "missing user id")
 	}
 
-	userID, err := strconv.ParseInt(fmt.Sprintf("%s", rawUserID), 10, 64)
+	userID, err := strconv.ParseInt(fmt.Sprintf("%s", rawUserID[0]), 10, 64)
 	if err != nil {
 		return -1, status.Errorf(codes.InvalidArgument, "bad user id")
 	}
