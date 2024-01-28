@@ -17,6 +17,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/binary"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/credential"
 	localCmd "github.com/erupshis/key_keeper/internal/agent/controller/commands/local"
+	"github.com/erupshis/key_keeper/internal/agent/controller/commands/server"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/text"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
@@ -74,26 +75,15 @@ func main() {
 	}
 	bin := binary.NewBinary(&binaryConfig)
 
-	cmdLocal := localCmd.NewLocal(userInteractor)
-
-	cmdConfig := commands.Config{
-		StateMachines:   sm,
-		BankCard:        bankCard,
-		Credential:      cred,
-		Text:            txt,
-		Binary:          bin,
-		LocalStorageCmd: cmdLocal,
-	}
-	cmds := commands.NewCommands(userInteractor, &cmdConfig)
-
 	inMemoryStorage := inmemory.NewStorage(dataCryptor)
 	localAutoSaveConfig := local.AutoSaveConfig{
 		SaveInterval:    cfg.LocalStoreInterval,
 		InMemoryStorage: inMemoryStorage,
 		Logs:            logs,
 	}
-
 	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, userInteractor, &localAutoSaveConfig, dataCryptor)
+
+	cmdLocal := localCmd.NewLocal(userInteractor)
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -110,14 +100,31 @@ func main() {
 	}
 	defer deferutils.ExecWithLogError(grpcClient.Close, logs)
 
+	serverCommandConfig := server.Config{
+		Inmemory: inMemoryStorage,
+		Local:    localStorage,
+		Client:   grpcClient,
+		Iactr:    userInteractor,
+	}
+	serverCommand := server.NewServer(&serverCommandConfig)
+
+	cmdConfig := commands.Config{
+		StateMachines:   sm,
+		BankCard:        bankCard,
+		Credential:      cred,
+		Text:            txt,
+		Binary:          bin,
+		LocalStorageCmd: cmdLocal,
+		Server:          serverCommand,
+	}
+	cmds := commands.NewCommands(userInteractor, &cmdConfig)
+
 	controllerConfig := controller.Config{
 		Inmemory:   inMemoryStorage,
 		Local:      localStorage,
-		Client:     grpcClient,
 		Interactor: userInteractor,
 		Cmds:       cmds,
 	}
-
 	mainController := controller.NewController(&controllerConfig)
 
 	ctxWithCancel, cancel := context.WithCancel(context.Background())

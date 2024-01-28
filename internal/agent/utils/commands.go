@@ -11,6 +11,7 @@ const (
 	CommandPull     = "pull"
 	CommandPush     = "push"
 	CommandSave     = "save"
+	CommandServer   = "server"
 	CommandUpdate   = "update"
 
 	CommandFilters = "filters"
