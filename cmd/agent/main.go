@@ -21,6 +21,7 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/text"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
+	"github.com/erupshis/key_keeper/internal/agent/storage/binaries"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 	"github.com/erupshis/key_keeper/internal/common/auth/authgrpc"
@@ -77,9 +78,11 @@ func main() {
 	bin := binary.NewBinary(&binaryConfig)
 
 	inMemoryStorage := inmemory.NewStorage(dataCryptor)
+	binaryManager := binaries.NewBinaryManager(cfg.LocalStoragePath)
 	localAutoSaveConfig := local.AutoSaveConfig{
 		SaveInterval:    cfg.LocalStoreInterval,
 		InMemoryStorage: inMemoryStorage,
+		BinaryManager:   binaryManager,
 		Logs:            logs,
 	}
 	localStorage := local.NewFileManager(cfg.LocalStoragePath, logs, userInteractor, &localAutoSaveConfig, dataCryptor)

@@ -33,6 +33,23 @@ func (s *Storage) GetRecords(recordType models.RecordType, filters map[string]st
 	return res, nil
 }
 
+func (s *Storage) GetBinFilesList() map[string]struct{} {
+	res := make(map[string]struct{})
+	for _, record := range s.records {
+		if record.Data.Binary == nil {
+			continue
+		}
+
+		if record.Deleted {
+			continue
+		}
+
+		res[record.Data.Binary.SecuredFileName] = struct{}{}
+	}
+
+	return res
+}
+
 func canRecordBeReturned(record *models.Record, recordType models.RecordType) bool {
 	if record.Deleted {
 		return false

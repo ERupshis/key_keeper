@@ -10,6 +10,7 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
 	"github.com/erupshis/key_keeper/internal/agent/models"
+	"github.com/erupshis/key_keeper/internal/agent/storage/binaries"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/erupshis/key_keeper/internal/common/logger"
@@ -18,13 +19,14 @@ import (
 )
 
 const (
-	keyStorageName = "key_keeper_strg"
+	KeyStorageName = "key_keeper_strg"
 )
 
 // AutoSaveConfig auto save settings.
 type AutoSaveConfig struct {
 	SaveInterval    time.Duration
 	InMemoryStorage *inmemory.Storage
+	BinaryManager   *binaries.BinaryManager
 	Logs            logger.BaseLogger
 }
 
@@ -46,7 +48,7 @@ type FileManager struct {
 // NewFileManager creates a new instance of FileManager with the specified models path and logger.
 func NewFileManager(dataPath string, logger logger.BaseLogger, iactr *interactor.Interactor, autoSaveCfg *AutoSaveConfig, cryptHasher *ska.SKA) *FileManager {
 	return &FileManager{
-		path:        dataPath + keyStorageName,
+		path:        dataPath + KeyStorageName,
 		logs:        logger,
 		iactr:       iactr,
 		autoSaveCfg: autoSaveCfg,
@@ -173,7 +175,7 @@ func (fm *FileManager) Path() string {
 }
 
 func (fm *FileManager) SetPath(newPath string) {
-	fm.path = newPath + keyStorageName
+	fm.path = newPath + KeyStorageName
 }
 
 func (fm *FileManager) RunAutoSave(ctx context.Context) {
@@ -184,15 +186,29 @@ func (fm *FileManager) RunAutoSave(ctx context.Context) {
 			storeTicker.Stop()
 			return
 		default:
-			records, err := fm.autoSaveCfg.InMemoryStorage.GetAllRecords()
-			if err != nil {
-				fm.autoSaveCfg.Logs.Infof("failed to extract inmemory models, error: %v", err)
-			}
-
-			if err = fm.SaveUserData(records); err != nil {
-				fm.autoSaveCfg.Logs.Infof("failed to save models in local storage, error: %v", err)
-			}
+			fm.saveRecords()
 		}
 
 	})
+}
+
+func (fm *FileManager) saveRecords() {
+	records, err := fm.autoSaveCfg.InMemoryStorage.GetAllRecords()
+	if err != nil {
+		fm.autoSaveCfg.Logs.Infof("failed to extract inmemory models, error: %v", err)
+	}
+
+	if err = fm.SaveUserData(records); err != nil {
+		fm.autoSaveCfg.Logs.Infof("failed to save models in local storage, error: %v", err)
+	}
+}
+
+func (fm *FileManager) SyncBinaries() {
+	fm.autoSaveCfg.BinaryManager.SetPath(filepath.Dir(fm.path))
+	actualFiles := fm.autoSaveCfg.InMemoryStorage.GetBinFilesList()
+
+	actualFiles[KeyStorageName] = struct{}{}
+	if err := fm.autoSaveCfg.BinaryManager.SyncFiles(actualFiles); err != nil {
+		fm.autoSaveCfg.Logs.Infof("sync actual binaries, error: %v", err)
+	}
 }
