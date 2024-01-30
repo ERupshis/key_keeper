@@ -7,7 +7,9 @@ import (
 )
 
 func (s *Storage) AddRecord(record *models.Record) error {
-	record.ID = s.getNextFreeIdx()
+	if record.ID <= 0 {
+		record.ID = s.getNextFreeIdx()
+	}
 	record.UpdatedAt = time.Now()
 
 	s.records = append(s.records, *record)

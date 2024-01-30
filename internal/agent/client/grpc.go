@@ -106,3 +106,12 @@ func (g *GRPC) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, e
 
 	return nil, fmt.Errorf("receive record: %w", err)
 }
+
+func (g *GRPC) PushBinary(ctx context.Context, binaries map[string]string) error {
+	return nil
+}
+
+func (g *GRPC) PullBinary(ctx context.Context) error {
+	// TODO: need to perform file loading and syncing.
+	return nil
+}

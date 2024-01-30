@@ -19,5 +19,13 @@ func (s *Server) ProcessPushCommand(ctx context.Context) error {
 		return fmt.Errorf("push records on server: %w", err)
 	}
 
+	if err = s.inmemory.RemoveLocalRecords(); err != nil {
+		return fmt.Errorf("delete local records error: %w", err)
+	}
+
+	if err = s.ProcessPullCommand(ctx); err != nil {
+		return fmt.Errorf("server push command: %w", err)
+	}
+
 	return nil
 }

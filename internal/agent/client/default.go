@@ -40,6 +40,14 @@ func (d *Default) Pull(ctx context.Context) (map[int64]localModels.StorageRecord
 	return nil, nil
 }
 
+func (d *Default) PushBinary(ctx context.Context, binaries map[string]string) error {
+	return nil
+}
+
+func (d *Default) PullBinary(ctx context.Context) error {
+	return nil
+}
+
 func (d *Default) Close() error {
 	return nil
 }

@@ -34,6 +34,19 @@ func (s *Storage) GetAllRecordsForServer() ([]localModels.StorageRecord, error) 
 	return res, nil
 }
 
+func (s *Storage) RemoveLocalRecords() error {
+	recordsToRemoveCount := 0
+	for idx := range s.records {
+		if s.records[idx].ID <= 0 {
+			s.records[idx], s.records[len(s.records)-1-recordsToRemoveCount] = s.records[len(s.records)-1-recordsToRemoveCount], s.records[idx]
+			recordsToRemoveCount++
+		}
+	}
+
+	s.records = s.records[:(len(s.records) - recordsToRemoveCount)]
+	return nil
+}
+
 func (s *Storage) Sync(serverRecords map[int64]localModels.StorageRecord) error {
 	syncedRecordsIdxs, err := s.syncLocalRecords(serverRecords)
 	if err != nil {
