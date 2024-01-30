@@ -1,8 +1,8 @@
 package models
 
 import (
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
-	"github.com/erupshis/key_keeper/internal/models"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

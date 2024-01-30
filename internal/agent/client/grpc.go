@@ -6,9 +6,9 @@ import (
 	"io"
 
 	clientModels "github.com/erupshis/key_keeper/internal/agent/client/models"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
-	"github.com/erupshis/key_keeper/internal/models"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"

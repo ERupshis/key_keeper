@@ -6,8 +6,8 @@ import (
 	"regexp"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/models"
 )
 
 type stateConfirm int

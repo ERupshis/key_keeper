@@ -1,8 +1,8 @@
 package inmemory
 
 import (
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
-	"github.com/erupshis/key_keeper/internal/models"
 )
 
 type Storage struct {

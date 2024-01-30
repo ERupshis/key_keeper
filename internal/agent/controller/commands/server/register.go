@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/erupshis/key_keeper/internal/models"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
 func (s *Server) ProcessRegisterCommand(ctx context.Context) error {

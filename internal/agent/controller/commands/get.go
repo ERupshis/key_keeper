@@ -5,19 +5,19 @@ import (
 	"text/tabwriter"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	models2 "github.com/erupshis/key_keeper/internal/models"
 )
 
 func (c *Commands) Get(parts []string, storage *inmemory.Storage) {
-	supportedTypes := []string{models2.StrAny, models2.StrCredentials, models2.StrBankCard, models2.StrText, models2.StrBinary}
+	supportedTypes := []string{models.StrAny, models.StrCredentials, models.StrBankCard, models.StrText, models.StrBinary}
 	if len(parts) != 2 {
 		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandGet, supportedTypes)
 		return
 	}
 
-	records, err := c.handleGet(models2.ConvertStringToRecordType(parts[1]), storage)
+	records, err := c.handleGet(models.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
 		c.handleCommandError(err, utils.CommandGet, supportedTypes)
 		return
@@ -26,7 +26,7 @@ func (c *Commands) Get(parts []string, storage *inmemory.Storage) {
 	c.writeGetResult(records)
 }
 
-func (c *Commands) writeGetResult(records []models2.Record) {
+func (c *Commands) writeGetResult(records []models.Record) {
 	if len(records) == 0 {
 		c.iactr.Printf("missing record(s)\n")
 	} else {
@@ -43,8 +43,8 @@ func (c *Commands) writeGetResult(records []models2.Record) {
 	}
 }
 
-func (c *Commands) handleGet(recordType models2.RecordType, storage *inmemory.Storage) ([]models2.Record, error) {
-	if recordType == models2.TypeUndefined {
+func (c *Commands) handleGet(recordType models.RecordType, storage *inmemory.Storage) ([]models.Record, error) {
+	if recordType == models.TypeUndefined {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrIncorrectRecordType)
 	}
 
@@ -64,7 +64,7 @@ func (c *Commands) handleGet(recordType models2.RecordType, storage *inmemory.St
 	return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, errs.ErrUnexpected)
 }
 
-func (c *Commands) getRecordByID(id int64, storage *inmemory.Storage) ([]models2.Record, error) {
+func (c *Commands) getRecordByID(id int64, storage *inmemory.Storage) ([]models.Record, error) {
 	record, err := storage.GetRecord(id)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)
@@ -74,10 +74,10 @@ func (c *Commands) getRecordByID(id int64, storage *inmemory.Storage) ([]models2
 		return nil, nil
 	}
 
-	return []models2.Record{*record}, nil
+	return []models.Record{*record}, nil
 }
 
-func (c *Commands) getRecordByFilters(recordType models2.RecordType, filters map[string]string, storage *inmemory.Storage) ([]models2.Record, error) {
+func (c *Commands) getRecordByFilters(recordType models.RecordType, filters map[string]string, storage *inmemory.Storage) ([]models.Record, error) {
 	records, err := storage.GetRecords(recordType, filters)
 	if err != nil {
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandGet, err)

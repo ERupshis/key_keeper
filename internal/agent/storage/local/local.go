@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/erupshis/key_keeper/internal/common/ticker"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
-	"github.com/erupshis/key_keeper/internal/models"
 )
 
 const (

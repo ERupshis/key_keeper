@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
-	"github.com/erupshis/key_keeper/internal/models"
 )
 
 // fileScanner is responsible for scanning user models from the file.

@@ -3,7 +3,7 @@ package inmemory
 import (
 	"time"
 
-	"github.com/erupshis/key_keeper/internal/models"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
 func (s *Storage) UpdateRecord(record *models.Record) error {

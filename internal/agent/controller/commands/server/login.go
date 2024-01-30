@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/models"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
 func (s *Server) ProcessLoginCommand(ctx context.Context) error {
