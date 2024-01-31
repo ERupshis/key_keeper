@@ -8,7 +8,7 @@ import (
 
 	clientModels "github.com/erupshis/key_keeper/internal/agent/client/models"
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
-	"github.com/erupshis/key_keeper/internal/server/storage"
+	"github.com/erupshis/key_keeper/internal/server/storage/records"
 	"github.com/erupshis/key_keeper/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -23,10 +23,10 @@ const (
 type Controller struct {
 	pb.UnimplementedSyncServer
 
-	storage storage.BaseStorage
+	storage records.BaseStorage
 }
 
-func NewController(storage storage.BaseStorage) *Controller {
+func NewController(storage records.BaseStorage) *Controller {
 	return &Controller{
 		storage: storage,
 	}

@@ -19,8 +19,11 @@ import (
 	"github.com/erupshis/key_keeper/internal/server"
 	"github.com/erupshis/key_keeper/internal/server/auth"
 	"github.com/erupshis/key_keeper/internal/server/config"
-	"github.com/erupshis/key_keeper/internal/server/storage/postgres"
+	minioS3 "github.com/erupshis/key_keeper/internal/server/storage/binaries/s3/minio"
+	"github.com/erupshis/key_keeper/internal/server/storage/records/postgres"
 	"github.com/erupshis/key_keeper/internal/server/sync"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	_ "google.golang.org/grpc/encoding/gzip"
@@ -43,6 +46,19 @@ func main() {
 	}
 
 	ctxWithCancel, cancel := context.WithCancel(context.Background())
+
+	// s3.
+	minioClient, err := minio.New(cfg.S3Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.S3Login, cfg.S3Password, ""),
+		Secure: false,
+	})
+	if err != nil {
+		logs.Fatalf("connect to s3 storage: %v", err)
+	}
+
+	bucketManager := minioS3.NewBucketManager(minioClient)
+	objectManager := minioS3.NewObjectManager(minioClient)
+
 	// storage.
 	dbConfig := db.Config{
 		DSN:              cfg.DatabaseDSN,
