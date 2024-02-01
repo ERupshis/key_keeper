@@ -16,7 +16,7 @@ type ObjectName struct {
 
 type Object struct {
 	Name        string
-	Data        string
+	Data        []byte
 	Size        int64
 	ContentType string
 

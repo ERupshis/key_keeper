@@ -72,7 +72,7 @@ func main() {
 	recordsStorage := postgres.NewPostgres(databaseConn, logs)
 
 	// handlers controller.
-	syncController := sync.NewController(recordsStorage)
+	syncController := sync.NewController(recordsStorage, bucketManager, objectManager)
 
 	// jwt tokens.
 	jwtGenerator, err := jwtgenerator.NewJWTGenerator(cfg.JWT, 2)

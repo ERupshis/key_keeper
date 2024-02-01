@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 	"github.com/erupshis/key_keeper/internal/server/storage/binaries/models"
@@ -12,23 +11,27 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
+const (
+	TypeBinary = "application/octet-stream"
+)
+
 var (
 	_ s3.BaseObjectManager = (*ObjectManager)(nil)
 )
 
 type ObjectManager struct {
-	*minio.Client
+	client *minio.Client
 }
 
 func NewObjectManager(client *minio.Client) *ObjectManager {
-	return &ObjectManager{Client: client}
+	return &ObjectManager{client: client}
 }
 
 func (om *ObjectManager) PutObject(ctx context.Context, objectData *models.Object) error {
-	_, err := om.Client.PutObject(ctx,
+	_, err := om.client.PutObject(ctx,
 		objectData.Bucket,
 		objectData.Name,
-		strings.NewReader(objectData.Data),
+		bytes.NewReader(objectData.Data),
 		objectData.Size,
 		minio.PutObjectOptions{ContentType: objectData.ContentType},
 	)
@@ -41,7 +44,7 @@ func (om *ObjectManager) PutObject(ctx context.Context, objectData *models.Objec
 }
 
 func (om *ObjectManager) GetObject(ctx context.Context, objectShortData *models.ObjectName) (*models.Object, error) {
-	object, err := om.Client.GetObject(ctx,
+	object, err := om.client.GetObject(ctx,
 		objectShortData.Bucket,
 		objectShortData.Name,
 		minio.GetObjectOptions{},
@@ -68,12 +71,12 @@ func (om *ObjectManager) GetObject(ctx context.Context, objectShortData *models.
 		return nil, fmt.Errorf("copy object's data to result: %w", err)
 	}
 
-	res.Data = buf.String()
+	res.Data = buf.Bytes()
 	return &res, nil
 }
 
 func (om *ObjectManager) StatObject(ctx context.Context, objectShortData *models.ObjectName) (*models.ObjectStat, error) {
-	stat, err := om.Client.StatObject(ctx,
+	stat, err := om.client.StatObject(ctx,
 		objectShortData.Bucket,
 		objectShortData.Name,
 		minio.StatObjectOptions{},
@@ -101,7 +104,7 @@ func (om *ObjectManager) RemoveObject(ctx context.Context, objectShortData *mode
 		GovernanceBypass: true,
 	}
 
-	err := om.Client.RemoveObject(ctx,
+	err := om.client.RemoveObject(ctx,
 		objectShortData.Bucket,
 		objectShortData.Name, opts,
 	)
@@ -122,7 +125,7 @@ func (om *ObjectManager) RemoveObjectsInBucket(ctx context.Context, bucketName s
 
 	go func() {
 		defer close(objectsCh)
-		for object := range om.Client.ListObjects(ctx, bucketName, listOpts) {
+		for object := range om.client.ListObjects(ctx, bucketName, listOpts) {
 			if object.Err != nil {
 				// TODO: handle err.
 				break
@@ -136,7 +139,7 @@ func (om *ObjectManager) RemoveObjectsInBucket(ctx context.Context, bucketName s
 	}
 
 	var err error
-	for removeErr := range om.Client.RemoveObjects(ctx, bucketName, objectsCh, removeOpts) {
+	for removeErr := range om.client.RemoveObjects(ctx, bucketName, objectsCh, removeOpts) {
 		err = fmt.Errorf("remove object '%s': %w", removeErr.ObjectName, removeErr.Err)
 	}
 
@@ -144,7 +147,7 @@ func (om *ObjectManager) RemoveObjectsInBucket(ctx context.Context, bucketName s
 }
 
 func (om *ObjectManager) ListObjects(ctx context.Context, bucketName string) <-chan models.ObjectStat {
-	objectCh := om.Client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
+	objectCh := om.client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
 		Recursive: true,
 	})
 

@@ -14,17 +14,17 @@ var (
 )
 
 type BucketManager struct {
-	*minio.Client
+	client *minio.Client
 }
 
 func NewBucketManager(client *minio.Client) *BucketManager {
-	return &BucketManager{Client: client}
+	return &BucketManager{client: client}
 }
 
 func (bm *BucketManager) MakeBucket(ctx context.Context, bucketName string, location string) error {
-	err := bm.Client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: location})
+	err := bm.client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: location})
 	if err != nil {
-		exists, errBucketExists := bm.Client.BucketExists(ctx, bucketName)
+		exists, errBucketExists := bm.client.BucketExists(ctx, bucketName)
 		if errBucketExists == nil && exists {
 			return fmt.Errorf("already added bucket: '%s'", bucketName)
 		} else {
@@ -36,7 +36,7 @@ func (bm *BucketManager) MakeBucket(ctx context.Context, bucketName string, loca
 }
 
 func (bm *BucketManager) ListBuckets(ctx context.Context) ([]models.Bucket, error) {
-	buckets, err := bm.Client.ListBuckets(ctx)
+	buckets, err := bm.client.ListBuckets(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list buckets: %w", err)
 	}
@@ -52,7 +52,7 @@ func (bm *BucketManager) ListBuckets(ctx context.Context) ([]models.Bucket, erro
 }
 
 func (bm *BucketManager) BucketExists(ctx context.Context, bucketName string) (bool, error) {
-	found, err := bm.Client.BucketExists(ctx, bucketName)
+	found, err := bm.client.BucketExists(ctx, bucketName)
 	if err != nil {
 		return false, fmt.Errorf("check bucket presence: %w", err)
 	}
@@ -61,7 +61,7 @@ func (bm *BucketManager) BucketExists(ctx context.Context, bucketName string) (b
 }
 
 func (bm *BucketManager) RemoveBucket(ctx context.Context, bucketName string) error {
-	err := bm.Client.RemoveBucket(ctx, bucketName)
+	err := bm.client.RemoveBucket(ctx, bucketName)
 	if err != nil {
 		return fmt.Errorf("remove bucket: %w", err)
 	}
