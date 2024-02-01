@@ -113,6 +113,7 @@ func main() {
 		Local:    localStorage,
 		Client:   grpcClient,
 		Iactr:    userInteractor,
+		Binary:   binaryManager,
 	}
 	serverCommand := server.NewServer(&serverCommandConfig)
 

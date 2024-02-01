@@ -13,8 +13,8 @@ type BaseClient interface {
 
 	Push(ctx context.Context, records []localModels.StorageRecord) error
 	Pull(ctx context.Context) (map[int64]localModels.StorageRecord, error)
-	PushBinary(ctx context.Context, binaries map[string]string) error
-	PullBinary(ctx context.Context) error
+	PushBinary(ctx context.Context, binaries map[string][]byte) error
+	PullBinary(ctx context.Context) (map[string][]byte, error)
 
 	Close() error
 }

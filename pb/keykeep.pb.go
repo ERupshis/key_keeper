@@ -372,7 +372,7 @@ func (x *Binary) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Binary.ProtoReflect.Descriptor instead.
+// Deprecated: Use binary.ProtoReflect.Descriptor instead.
 func (*Binary) Descriptor() ([]byte, []int) {
 	return file_keykeep_proto_rawDescGZIP(), []int{6}
 }
@@ -585,7 +585,7 @@ var file_keykeep_proto_goTypes = []interface{}{
 	(*Record)(nil),                // 3: proto_keykeep.Record
 	(*PushRequest)(nil),           // 4: proto_keykeep.PushRequest
 	(*PullResponse)(nil),          // 5: proto_keykeep.PullResponse
-	(*Binary)(nil),                // 6: proto_keykeep.Binary
+	(*Binary)(nil),                // 6: proto_keykeep.binary
 	(*PushBinaryRequest)(nil),     // 7: proto_keykeep.PushBinaryRequest
 	(*PullBinaryResponse)(nil),    // 8: proto_keykeep.PullBinaryResponse
 	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
@@ -597,8 +597,8 @@ var file_keykeep_proto_depIdxs = []int32{
 	9,  // 2: proto_keykeep.Record.updated_at:type_name -> google.protobuf.Timestamp
 	3,  // 3: proto_keykeep.PushRequest.record:type_name -> proto_keykeep.Record
 	3,  // 4: proto_keykeep.PullResponse.record:type_name -> proto_keykeep.Record
-	6,  // 5: proto_keykeep.PushBinaryRequest.binary:type_name -> proto_keykeep.Binary
-	6,  // 6: proto_keykeep.PullBinaryResponse.binary:type_name -> proto_keykeep.Binary
+	6,  // 5: proto_keykeep.PushBinaryRequest.binary:type_name -> proto_keykeep.binary
+	6,  // 6: proto_keykeep.PullBinaryResponse.binary:type_name -> proto_keykeep.binary
 	1,  // 7: proto_keykeep.Auth.Login:input_type -> proto_keykeep.LoginRequest
 	2,  // 8: proto_keykeep.Auth.Register:input_type -> proto_keykeep.RegisterRequest
 	4,  // 9: proto_keykeep.Sync.Push:input_type -> proto_keykeep.PushRequest

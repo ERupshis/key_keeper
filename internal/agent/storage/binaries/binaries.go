@@ -19,6 +19,32 @@ func (bm *BinaryManager) SetPath(newPath string) {
 	bm.path = newPath
 }
 
+func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error { // TODO:need to add goroutine and return channel.
+	for k, v := range binaries {
+		err := os.WriteFile(filepath.Join(bm.path, k), v, 0666)
+		if err != nil {
+			return fmt.Errorf("save binary file '%s' locally: %w", k, err)
+		}
+	}
+
+	return nil
+}
+
+func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string][]byte, error) {
+	res := make(map[string][]byte)
+
+	for k, _ := range binFilesList {
+		fileBytes, err := os.ReadFile(filepath.Join(bm.path, k))
+		if err != nil {
+			return nil, fmt.Errorf("read binary file: %w", err)
+		}
+
+		res[k] = fileBytes
+	}
+
+	return res, nil
+}
+
 func (bm *BinaryManager) SyncFiles(actualFiles map[string]struct{}) error {
 	var binFiles []string
 

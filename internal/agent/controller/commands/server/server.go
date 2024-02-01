@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/erupshis/key_keeper/internal/agent/client"
 	"github.com/erupshis/key_keeper/internal/agent/interactor"
+	"github.com/erupshis/key_keeper/internal/agent/storage/binaries"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/storage/local"
 )
@@ -10,6 +11,7 @@ import (
 type Config struct {
 	Inmemory *inmemory.Storage
 	Local    *local.FileManager
+	Binary   *binaries.BinaryManager
 
 	Client client.BaseClient
 	Iactr  *interactor.Interactor
@@ -18,6 +20,7 @@ type Config struct {
 type Server struct {
 	inmemory *inmemory.Storage
 	local    *local.FileManager
+	binary   *binaries.BinaryManager
 
 	client client.BaseClient
 
@@ -30,5 +33,6 @@ func NewServer(cfg *Config) *Server {
 		local:    cfg.Local,
 		client:   cfg.Client,
 		inmemory: cfg.Inmemory,
+		binary:   cfg.Binary,
 	}
 }

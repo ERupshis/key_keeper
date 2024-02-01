@@ -84,7 +84,7 @@ func (r Record) String() string {
 	case TypeText:
 		formatBuilder.WriteString(" Text: %+v,")
 	case TypeBinary:
-		formatBuilder.WriteString(" Binary: %+v,")
+		formatBuilder.WriteString(" binary: %+v,")
 	default:
 	}
 	formatBuilder.WriteString(" MetaData: %s}")
@@ -109,7 +109,7 @@ func (r Record) TabString() string {
 	case TypeText:
 		formatBuilder.WriteString("\tText: %+v")
 	case TypeBinary:
-		formatBuilder.WriteString("\tBinary: %+v")
+		formatBuilder.WriteString("\tbinary: %+v")
 	default:
 	}
 

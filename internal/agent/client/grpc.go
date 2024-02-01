@@ -107,11 +107,49 @@ func (g *GRPC) Pull(ctx context.Context) (map[int64]localModels.StorageRecord, e
 	return nil, fmt.Errorf("receive record: %w", err)
 }
 
-func (g *GRPC) PushBinary(ctx context.Context, binaries map[string]string) error {
+func (g *GRPC) PushBinary(ctx context.Context, binaries map[string][]byte) error {
+	stream, err := g.syncClient.PushBinary(ctx)
+	if err != nil {
+		return fmt.Errorf("push binaries: establish connection: %w", err)
+	}
+
+	defer func() {
+		_, _ = stream.CloseAndRecv()
+	}() // TODO: need to add logging.
+
+	for k, v := range binaries {
+		binary := &pb.Binary{
+			Name: k,
+			Data: v,
+		}
+
+		if err = stream.Send(&pb.PushBinaryRequest{Binary: binary}); err != nil {
+			return fmt.Errorf("sendbinary file: %w", err)
+		}
+	}
+
 	return nil
 }
 
-func (g *GRPC) PullBinary(ctx context.Context) error {
-	// TODO: need to perform file loading and syncing.
-	return nil
+func (g *GRPC) PullBinary(ctx context.Context) (map[string][]byte, error) {
+	res := make(map[string][]byte)
+
+	stream, err := g.syncClient.PullBinary(ctx, &emptypb.Empty{})
+	if err != nil {
+		return nil, fmt.Errorf("pull binaries: establish connection: %w", err)
+	}
+
+	for {
+		binaryRaw, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return nil, fmt.Errorf("receive binary from from stream: %w", err)
+			}
+		}
+
+		res[binaryRaw.GetBinary().GetName()] = binaryRaw.GetBinary().GetData()
+	}
+	return res, nil
 }
