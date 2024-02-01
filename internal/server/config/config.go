@@ -47,9 +47,9 @@ func checkFlags(config *Config) {
 	flag.StringVar(&config.JWT, flagJWT, "SECRET_KEY", "jwt token generation key")
 	flag.StringVar(&config.HashKey, flagHashKey, "SECRET_KEY", "user passwords hasher key")
 
-	flag.StringVar(&config.S3Login, flagS3Login, "SECRET_KEY", "s3 access key id")
-	flag.StringVar(&config.S3Password, flagS3Password, "SECRET_KEY", "s3 access key")
-	flag.StringVar(&config.S3Endpoint, flagS3Endpoint, "SECRET_KEY", "s3 endpoint")
+	flag.StringVar(&config.S3Login, flagS3Login, "qwerty", "s3 access key id")
+	flag.StringVar(&config.S3Password, flagS3Password, "asd123456", "s3 access key")
+	flag.StringVar(&config.S3Endpoint, flagS3Endpoint, "localhost:19000", "s3 endpoint")
 
 	flag.Parse()
 }

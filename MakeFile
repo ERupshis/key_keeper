@@ -4,7 +4,7 @@
 docker_down:
 	docker-compose stop
 	docker-compose down
-	docker rmi players integration
+	docker rmi server
 
 docker_up:
 	docker-compose up

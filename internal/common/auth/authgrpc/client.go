@@ -33,7 +33,7 @@ func (c *ClientInterceptor) StreamClient() grpc.StreamClientInterceptor {
 			return s, err
 		}
 
-		if methodOk {
+		if methodOk && procName == Login {
 			c.extractTokenFromHeader(&header)
 		}
 
@@ -57,7 +57,7 @@ func (c *ClientInterceptor) UnaryClient() grpc.UnaryClientInterceptor {
 			return err
 		}
 
-		if methodOk {
+		if methodOk && procName == Login {
 			c.extractTokenFromHeader(&header)
 		}
 

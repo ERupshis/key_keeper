@@ -14,10 +14,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	Login    = "Auth/Login"
+	Register = "Auth/Register"
+)
+
 var (
 	procExclusions = map[string]struct{}{
-		"Auth/Login":    struct{}{},
-		"Auth/Register": struct{}{},
+		Login:    struct{}{},
+		Register: struct{}{},
 	}
 )
 

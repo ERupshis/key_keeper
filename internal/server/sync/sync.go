@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	metaUserID = "user_id"
-	location   = "eu-central-1"
+	metaUserID     = "user_id"
+	location       = "eu-central-1"
+	userBucketPref = "user"
 )
 
 type Controller struct {
@@ -92,7 +93,7 @@ func (c *Controller) PushBinary(stream pb.Sync_PushBinaryServer) error {
 		return status.Errorf(codes.Internal, "extract userID from jwt: %v", err)
 	}
 
-	userBucket := strconv.FormatInt(userID, 10)
+	userBucket := userBucketPref + strconv.FormatInt(userID, 10)
 	if err = c.createBucketIfMissing(stream.Context(), userBucket); err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func (c *Controller) PullBinary(_ *emptypb.Empty, stream pb.Sync_PullBinaryServe
 		return status.Errorf(codes.Internal, "extract userID from jwt: %v", err)
 	}
 
-	userBucket := strconv.FormatInt(userID, 10)
+	userBucket := userBucketPref + strconv.FormatInt(userID, 10)
 	binaryStats, err := c.getUserBinaryObjectsList(userBucket, stream)
 	if err != nil {
 		return err
@@ -164,6 +165,10 @@ func (c *Controller) getUserBinaryObjectsList(userBucket string, stream pb.Sync_
 }
 
 func (c *Controller) sendUserBinaryObjects(userBucket string, objectsStat <-chan models.ObjectStat, stream pb.Sync_PullBinaryServer) error {
+	if objectsStat == nil {
+		return nil
+	}
+
 	for stat := range objectsStat {
 		object, err := c.objectManager.GetObject(stream.Context(), &models.ObjectName{Name: stat.Key, Bucket: userBucket})
 		if err != nil {

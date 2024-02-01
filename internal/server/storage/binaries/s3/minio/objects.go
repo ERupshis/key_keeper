@@ -148,7 +148,7 @@ func (om *ObjectManager) RemoveObjectsInBucket(ctx context.Context, bucketName s
 
 func (om *ObjectManager) ListObjects(ctx context.Context, bucketName string) <-chan models.ObjectStat {
 	objectCh := om.client.ListObjects(ctx, bucketName, minio.ListObjectsOptions{
-		Recursive: true,
+		Recursive: false,
 	})
 
 	resCh := make(chan models.ObjectStat, 1)
@@ -159,11 +159,9 @@ func (om *ObjectManager) ListObjects(ctx context.Context, bucketName string) <-c
 				break
 			}
 
-			tmpObj := <-objectCh
-
 			resCh <- models.ObjectStat{
-				Key:       tmpObj.Key,
-				VersionID: tmpObj.VersionID,
+				Key:       object.Key,
+				VersionID: object.VersionID,
 			}
 		}
 
