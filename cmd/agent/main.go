@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -152,7 +153,7 @@ func main() {
 		close(idleConnsClosed)
 	}()
 
-	if err = mainController.Serve(ctxWithCancel); err != nil && !errors.Is(err, context.Canceled) {
+	if err = mainController.Serve(ctxWithCancel); err != nil && !errors.Is(err, context.Canceled) && !errors.Is(err, io.EOF) {
 		logs.Infof("problem with controller: %v", err)
 	}
 	sigCh <- syscall.SIGQUIT
