@@ -23,6 +23,9 @@ secrets/
 # Dependency directories (remove the comment below to include it)
 vendor/
 
+# Dependency directories (remove the comment below to include it)
+build/
+
 # IDEs directories
 .idea
 .vscode
