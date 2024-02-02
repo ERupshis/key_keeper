@@ -8,6 +8,7 @@ const (
 	CommandExit     = "exit"
 	CommandExtract  = "extract"
 	CommandGet      = "get"
+	CommandHelp     = "help"
 	CommandSave     = "save"
 	CommandServer   = "server"
 	CommandUpdate   = "update"

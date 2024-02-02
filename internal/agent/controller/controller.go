@@ -67,6 +67,8 @@ func (c *Controller) Serve(ctx context.Context) error {
 				c.cmds.Extract(commandParts, c.inmemory)
 			case utils.CommandGet:
 				c.cmds.Get(commandParts, c.inmemory)
+			case utils.CommandHelp:
+				c.cmds.Help()
 			case utils.CommandServer:
 				c.cmds.Server(ctx, commandParts, c.inmemory)
 				c.local.SyncBinaries()
