@@ -2,7 +2,6 @@ package statemachines
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -92,7 +91,7 @@ func (s *StateMachines) addMetaData(record *models.Record) error {
 }
 
 func (s *StateMachines) stateMetaInitial() stateAddMeta {
-	fmt.Printf(
+	s.iactr.Printf(
 		"enter meta models(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
@@ -105,7 +104,7 @@ func (s *StateMachines) stateMetaData(record *models.Record) (stateAddMeta, erro
 	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexMetaData)
 
 	if metaData == utils.CommandSave {
-		fmt.Printf("entered metadata: %s\n", record.Data.MetaData)
+		s.iactr.Printf("entered metadata: %s\n", record.Data.MetaData)
 		return addMetaFinishState, err
 	}
 

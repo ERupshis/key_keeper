@@ -2,7 +2,6 @@ package statemachines
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
@@ -55,11 +54,11 @@ func (s *StateMachines) Confirm(record *models.Record, command string) (bool, er
 func (s *StateMachines) stateConfirmInitial(record *models.Record, command string) stateConfirm {
 	switch command {
 	case utils.CommandDelete:
-		fmt.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
 	case utils.CommandUpdate:
-		fmt.Printf("Do you really want to update the record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to update the record '%s'(yes/no): ", record)
 	default:
-		fmt.Printf("Do you really want to commit action with record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to commit action with record '%s'(yes/no): ", record)
 	}
 
 	return confirmApproveState

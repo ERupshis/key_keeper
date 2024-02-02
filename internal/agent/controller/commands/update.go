@@ -42,7 +42,7 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 	}
 
 	if len(records) != 1 {
-		fmt.Printf("Record with id '%d' was not found\n", id)
+		c.iactr.Printf("Record with id '%d' was not found\n", id)
 		return nil
 	}
 
