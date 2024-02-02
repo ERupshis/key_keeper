@@ -6,22 +6,19 @@ import (
 	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
+var (
+	zeroTime = time.Time{}
+)
+
 func (s *Storage) AddRecord(record *models.Record) error {
 	if record.ID <= 0 {
 		record.ID = s.getNextFreeIdx()
 	}
-	record.UpdatedAt = time.Now()
 
-	s.records = append(s.records, *record)
-	return nil
-}
-
-func (s *Storage) AddRecords(records []models.Record) error {
-	for idx := range records {
-		records[idx].ID = s.getNextFreeIdx()
-		records[idx].UpdatedAt = time.Now()
+	if record.UpdatedAt == zeroTime {
+		record.UpdatedAt = time.Now()
 	}
 
-	s.records = append(s.records, records...)
+	s.records = append(s.records, *record)
 	return nil
 }

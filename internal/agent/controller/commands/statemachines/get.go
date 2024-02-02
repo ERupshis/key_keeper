@@ -17,7 +17,8 @@ const (
 	getInitialState    = stateGet(0)
 	getSearchByID      = stateGet(1)
 	getSearchByFilters = stateGet(2)
-	getFinishState     = stateGet(3)
+	getSearchAllByType = stateGet(3)
+	getFinishState     = stateGet(4)
 )
 
 func (s *StateMachines) Get() (*int64, map[string]string, error) {
@@ -68,6 +69,11 @@ func (s *StateMachines) Get() (*int64, map[string]string, error) {
 				filters = filtersTmp
 				currentState = getFinishState
 			}
+		case getSearchAllByType:
+			{
+				filters = make(map[string]string)
+				currentState = getFinishState
+			}
 		}
 	}
 
@@ -80,6 +86,8 @@ func (s *StateMachines) getStateAccordingMethod(method string) stateGet {
 		return getSearchByID
 	case utils.CommandFilters:
 		return getSearchByFilters
+	case utils.CommandAll:
+		return getSearchAllByType
 	default:
 		// shouldn't happen.
 		return getInitialState
@@ -96,7 +104,7 @@ const (
 )
 
 var (
-	regexGetMethodData = regexp.MustCompile(`^(id|filters)$`)
+	regexGetMethodData = regexp.MustCompile(`^(id|filters|all)$`)
 )
 
 func (s *StateMachines) getMethod() (string, error) {
@@ -122,7 +130,7 @@ func (s *StateMachines) getMethod() (string, error) {
 }
 
 func (s *StateMachines) stateGetMethodInitial() stateGetMethod {
-	fmt.Printf("enter search method('%s' or '%s'): ", utils.CommandID, utils.CommandFilters)
+	s.iactr.Printf("enter search method('%s' or '%s' or '%s'): ", utils.CommandID, utils.CommandFilters, utils.CommandAll)
 	return getMethodSelectionState
 }
 
@@ -176,7 +184,7 @@ func (s *StateMachines) getID() (int64, error) {
 }
 
 func (s *StateMachines) stateGetIDInitial() stateGetID {
-	fmt.Printf("enter record %s: ", utils.CommandID)
+	s.iactr.Printf("enter record %s: ", utils.CommandID)
 	return getIDValueState
 }
 
@@ -235,7 +243,7 @@ func (s *StateMachines) getFilters() (map[string]string, error) {
 }
 
 func (s *StateMachines) stateGetFiltersInitial() stateGetFilters {
-	fmt.Printf(
+	s.iactr.Printf(
 		"enter filters through meta models(format: 'key%svalue') or '%s' or '%s': ",
 		utils.MetaSeparator,
 		utils.CommandCancel,
@@ -248,7 +256,7 @@ func (s *StateMachines) stateGetFiltersValue(filters map[string]string) (stateGe
 	metaData, ok, err := s.iactr.GetUserInputAndValidate(regexGetFilters)
 
 	if metaData == utils.CommandContinue {
-		fmt.Printf("entered filters: %s\n", filters)
+		s.iactr.Printf("entered filters: %s\n", filters)
 		return getFiltersFinishState, err
 	}
 

@@ -17,6 +17,7 @@ const (
 	CommandPush     = "push"
 	CommandRegister = "register"
 
+	CommandAll     = "all"
 	CommandFilters = "filters"
 	CommandID      = "id"
 
