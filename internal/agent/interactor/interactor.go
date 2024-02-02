@@ -39,7 +39,11 @@ func (i *Interactor) Writer() *Writer {
 
 func (i *Interactor) ReadCommand() ([]string, bool) {
 	i.Printf("enter command (or '%s'): ", utils.CommandExit)
-	command, _, _ := i.GetUserInputAndValidate(nil)
+	command, _, err := i.GetUserInputAndValidate(nil)
+	if errors.Is(err, io.EOF) {
+		return []string{utils.CommandExit}, true
+	}
+
 	command = strings.TrimSpace(command)
 	commandParts := strings.Split(command, " ")
 	if len(commandParts) == 0 || command == "" {
@@ -53,9 +57,11 @@ func (i *Interactor) ReadCommand() ([]string, bool) {
 func (i *Interactor) GetUserInputAndValidate(regex *regexp.Regexp) (string, bool, error) {
 	input, err := i.rd.getUserInput()
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			fmt.Printf("unexpected error, try again: %v\n", err)
+		if errors.Is(err, io.EOF) {
+			return "", true, errors.Join(io.EOF, errs.ErrInterruptedByUser)
 		}
+
+		i.Printf("unexpected error, try again: %v\n", err)
 		return "", false, nil
 	}
 
