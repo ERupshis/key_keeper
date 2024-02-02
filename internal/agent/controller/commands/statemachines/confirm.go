@@ -2,12 +2,11 @@ package statemachines
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
 type stateConfirm int
@@ -22,7 +21,7 @@ var (
 	regexConfirmApprove = regexp.MustCompile(`^(yes|no)$`)
 )
 
-func (s *StateMachines) Confirm(record *data.Record, command string) (bool, error) {
+func (s *StateMachines) Confirm(record *models.Record, command string) (bool, error) {
 	currentState := confirmInitialState
 
 	var confirmed bool
@@ -52,14 +51,14 @@ func (s *StateMachines) Confirm(record *data.Record, command string) (bool, erro
 	return confirmed, nil
 }
 
-func (s *StateMachines) stateConfirmInitial(record *data.Record, command string) stateConfirm {
+func (s *StateMachines) stateConfirmInitial(record *models.Record, command string) stateConfirm {
 	switch command {
 	case utils.CommandDelete:
-		fmt.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to permanently delete the record '%s'(yes/no): ", record)
 	case utils.CommandUpdate:
-		fmt.Printf("Do you really want to update the record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to update the record '%s'(yes/no): ", record)
 	default:
-		fmt.Printf("Do you really want to commit action with record '%s'(yes/no): ", record)
+		s.iactr.Printf("Do you really want to commit action with record '%s'(yes/no): ", record)
 	}
 
 	return confirmApproveState

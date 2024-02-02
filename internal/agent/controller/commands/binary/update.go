@@ -2,10 +2,10 @@ package binary
 
 import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (b *Binary) ProcessUpdateCommand(record *data.Record) error {
+func (b *Binary) ProcessUpdateCommand(record *models.Record) error {
 	cfg := statemachines.AddConfig{
 		Record:   record,
 		MainData: b.addMainData,

@@ -5,12 +5,12 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (c *Credential) ProcessAddCommand(record *data.Record) error {
-	record.Credentials = &data.Credential{}
-	record.RecordType = data.TypeCredentials
+func (c *Credential) ProcessAddCommand(record *models.Record) error {
+	record.Data.Credentials = &models.Credential{}
+	record.Data.RecordType = models.TypeCredentials
 
 	cfg := statemachines.AddConfig{
 		Record:   record,
@@ -30,7 +30,7 @@ const (
 	addFinishState   = addState(3)
 )
 
-func (c *Credential) addMainData(record *data.Record) error {
+func (c *Credential) addMainData(record *models.Record) error {
 	currentState := addInitialState
 
 	var err error
@@ -47,7 +47,7 @@ func (c *Credential) addMainData(record *data.Record) error {
 			}
 		case addPasswordState:
 			{
-				currentState, err = c.stateExpiration(record)
+				currentState, err = c.statePassword(record)
 				if err != nil {
 					return err
 				}
@@ -63,9 +63,9 @@ func (c *Credential) stateInitial() addState {
 	return addLoginState
 }
 
-func (c *Credential) stateLogin(record *data.Record) (addState, error) {
+func (c *Credential) stateLogin(record *models.Record) (addState, error) {
 	credLogin, ok, err := c.iactr.GetUserInputAndValidate(nil)
-	record.Credentials.Login = credLogin
+	record.Data.Credentials.Login = credLogin
 
 	if !ok {
 		return addLoginState, err
@@ -80,9 +80,9 @@ func (c *Credential) stateLogin(record *data.Record) (addState, error) {
 
 }
 
-func (c *Credential) stateExpiration(record *data.Record) (addState, error) {
+func (c *Credential) statePassword(record *models.Record) (addState, error) {
 	credPassword, ok, err := c.iactr.GetUserInputAndValidate(nil)
-	record.Credentials.Password = credPassword
+	record.Data.Credentials.Password = credPassword
 	if !ok {
 		return addPasswordState, err
 	}
@@ -91,6 +91,6 @@ func (c *Credential) stateExpiration(record *data.Record) (addState, error) {
 		return addPasswordState, err
 	}
 
-	c.iactr.Printf("entered credential data: %+v\n", *record.Credentials)
+	c.iactr.Printf("entered credential models: %+v\n", *record.Data.Credentials)
 	return addFinishState, err
 }

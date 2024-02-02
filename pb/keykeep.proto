@@ -1,0 +1,62 @@
+syntax = "proto3";
+package proto_keykeep;
+
+option go_package = "github.com/erupshis/key_keeper/pb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+
+service Auth {
+  rpc Login(LoginRequest) returns (google.protobuf.Empty);
+  rpc Register(RegisterRequest) returns (google.protobuf.Empty);
+}
+
+service Sync {
+  rpc Push(stream PushRequest) returns (google.protobuf.Empty);
+  rpc Pull(google.protobuf.Empty) returns (stream PullResponse);
+
+  rpc PushBinary(stream PushBinaryRequest) returns (google.protobuf.Empty);
+  rpc PullBinary(google.protobuf.Empty) returns (stream PullBinaryResponse);
+}
+
+message Creds {
+  string login = 1;
+  string password = 2;
+}
+
+message LoginRequest {
+  Creds creds = 1;
+}
+
+message RegisterRequest {
+  Creds creds = 1;
+}
+
+message Record {
+  int64 id = 1;
+  bytes data = 2;
+  bool deleted = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message PushRequest {
+  Record record = 1;
+}
+
+message PullResponse {
+  Record record = 1;
+}
+
+message Binary {
+  string name = 1;
+  bytes data = 2;
+}
+
+message PushBinaryRequest {
+  Binary binary = 1;
+}
+
+message PullBinaryResponse {
+  Binary binary = 1;
+}

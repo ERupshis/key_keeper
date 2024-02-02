@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS records_user_id_idx;

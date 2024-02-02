@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
+	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
 )
 
-// fileScanner is responsible for scanning user data from the file.
+// fileScanner is responsible for scanning user models from the file.
 type fileScanner struct {
 	file    *os.File
 	scanner *bufio.Scanner
@@ -26,11 +27,10 @@ func (fm *FileManager) initScanner() error {
 	return nil
 }
 
-// ScanRecord scans and returns a user data record from the file.
-func (fm *FileManager) ScanRecord() (*data.Record, error) {
+// ScanRecord scans and returns a user models record from the file.
+func (fm *FileManager) ScanRecord() (*models.Record, error) {
 	errMsg := "scan record: %w"
 
-	var record data.Record
 	if !fm.IsFileOpen() {
 		return nil, fmt.Errorf(errMsg, ErrFileIsNotOpen)
 	}
@@ -41,13 +41,24 @@ func (fm *FileManager) ScanRecord() (*data.Record, error) {
 		return nil, nil
 	}
 
-	encryptedRecord := fm.scannedBytes()
-	recordBytes, err := fm.cryptHasher.Decrypt(encryptedRecord)
-	if err != nil {
-		return nil, fmt.Errorf(errMsg, ErrFileIsNotOpen)
+	var storageRecord localModels.StorageRecord
+	storageRecordBytes := fm.scannedBytes()
+	if err := json.Unmarshal(storageRecordBytes, &storageRecord); err != nil {
+		return nil, fmt.Errorf(errMsg, err)
 	}
 
-	if err = json.Unmarshal(recordBytes, &record); err != nil {
+	storageRecordDataBytes, err := fm.cryptHasher.Decrypt(storageRecord.Data)
+	if err != nil {
+		return nil, fmt.Errorf(errMsg, err)
+	}
+
+	record := models.Record{
+		ID:        storageRecord.ID,
+		Deleted:   storageRecord.Deleted,
+		UpdatedAt: storageRecord.UpdatedAt,
+	}
+
+	if err = json.Unmarshal(storageRecordDataBytes, &record.Data); err != nil {
 		return nil, fmt.Errorf(errMsg, err)
 	}
 

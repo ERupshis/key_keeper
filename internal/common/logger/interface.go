@@ -4,7 +4,7 @@ import "net/http"
 
 // BaseLogger used logger interface definition.
 type BaseLogger interface {
-	// Sync Method for flushing data in stream.
+	// Sync Method for flushing models in stream.
 	Sync() error
 	// Infof posts message on log 'info' Level.
 	Infof(msg string, fields ...interface{})

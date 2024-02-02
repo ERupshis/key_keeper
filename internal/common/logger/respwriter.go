@@ -2,7 +2,7 @@ package logger
 
 import "net/http"
 
-// responseData extra data for logging.
+// responseData extra models for logging.
 type responseData struct {
 	status int
 	size   int
@@ -19,19 +19,19 @@ func createResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{w, &responseData{200, 0}}
 }
 
-// getResponseData returns extra data for logging.
+// getResponseData returns extra models for logging.
 func (r *loggingResponseWriter) getResponseData() *responseData {
 	return r.responseData
 }
 
-// Write decoration method to extract extra data from http.ResponseWriter.
+// Write decoration method to extract extra models from http.ResponseWriter.
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	size, err := r.ResponseWriter.Write(b)
 	r.responseData.size += size
 	return size, err
 }
 
-// WriteHeader decoration method to extract extra data from http.ResponseWriter.
+// WriteHeader decoration method to extract extra models from http.ResponseWriter.
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.ResponseWriter.WriteHeader(statusCode)
 	r.responseData.status = statusCode

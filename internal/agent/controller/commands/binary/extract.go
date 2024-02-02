@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (b *Binary) ProcessExtractCommand(record *data.Record) error {
+func (b *Binary) ProcessExtractCommand(record *models.Record) error {
 	cfg := statemachines.ExtractConfig{
 		Record:   record,
 		FileSave: b.fileSave,
@@ -18,9 +18,9 @@ func (b *Binary) ProcessExtractCommand(record *data.Record) error {
 	return b.sm.Extract(cfg)
 }
 
-func (b *Binary) fileSave(record *data.Record, pathToFile string) error {
+func (b *Binary) fileSave(record *models.Record, pathToFile string) error {
 	errMsg := "decode and save file from local storage: %w"
-	fileBytes, err := os.ReadFile(filepath.Join(b.storePath, record.Binary.SecuredFileName))
+	fileBytes, err := os.ReadFile(filepath.Join(b.storePath, record.Data.Binary.SecuredFileName))
 	if err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
@@ -35,15 +35,15 @@ func (b *Binary) fileSave(record *data.Record, pathToFile string) error {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	if hashSum != record.Binary.SecuredFileName {
+	if hashSum != record.Data.Binary.SecuredFileName {
 		return fmt.Errorf("hash sum is not equal")
 	}
 
-	err = os.WriteFile(filepath.Join(pathToFile, record.Binary.Name), decryptedFileBytes, 0666)
+	err = os.WriteFile(filepath.Join(pathToFile, record.Data.Binary.Name), decryptedFileBytes, 0666)
 	if err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	b.iactr.Printf("file extracted: %s\n", filepath.Join(pathToFile, record.Binary.Name))
+	b.iactr.Printf("file extracted: %s\n", filepath.Join(pathToFile, record.Data.Binary.Name))
 	return err
 }

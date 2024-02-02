@@ -5,19 +5,19 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	models2 "github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
 func (c *Commands) Add(parts []string, storage *inmemory.Storage) {
-	supportedTypes := []string{data.StrCredentials, data.StrBankCard, data.StrText, data.StrBinary}
+	supportedTypes := []string{models2.StrCredentials, models2.StrBankCard, models2.StrText, models2.StrBinary}
 	if len(parts) != 2 {
 		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandAdd, supportedTypes)
 		return
 	}
 
-	record, err := c.handleAdd(data.ConvertStringToRecordType(parts[1]), storage)
+	record, err := c.handleAdd(models2.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
 		c.handleCommandError(err, utils.CommandAdd, supportedTypes)
 		return
@@ -32,27 +32,28 @@ func (c *Commands) handleCommandError(err error, command string, supportedTypes 
 		return
 	}
 
-	c.iactr.Printf("request parsing error: %v", err)
-	if errors.Is(err, errs.ErrIncorrectRecordType) {
+	c.iactr.Printf("request processing error: %v", err)
+	if errors.Is(err, errs.ErrIncorrectRecordType) || errors.Is(err, errs.ErrIncorrectServerActionType) {
 		c.iactr.Printf(". only (%s) are supported", supportedTypes)
 	}
+
 	c.iactr.Printf("\n")
 }
 
-func (c *Commands) handleAdd(recordType data.RecordType, storage *inmemory.Storage) (*data.Record, error) {
-	newRecord := &data.Record{
+func (c *Commands) handleAdd(recordType models2.RecordType, storage *inmemory.Storage) (*models2.Record, error) {
+	newRecord := &models2.Record{
 		ID: -1,
 	}
 
 	var err error
 	switch recordType {
-	case data.TypeBankCard:
+	case models2.TypeBankCard:
 		err = c.bc.ProcessAddCommand(newRecord)
-	case data.TypeCredentials:
+	case models2.TypeCredentials:
 		err = c.creds.ProcessAddCommand(newRecord)
-	case data.TypeText:
+	case models2.TypeText:
 		err = c.text.ProcessAddCommand(newRecord)
-	case data.TypeBinary:
+	case models2.TypeBinary:
 		err = c.binary.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
