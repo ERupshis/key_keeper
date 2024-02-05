@@ -21,8 +21,8 @@ const (
 
 var (
 	procExclusions = map[string]struct{}{
-		Login:    struct{}{},
-		Register: struct{}{},
+		Login:    {},
+		Register: {},
 	}
 )
 
@@ -35,7 +35,7 @@ func (s *wrappedStream) Context() context.Context {
 	return s.ctx
 }
 
-func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) (int64, error) {
+func Authorize(ctx context.Context, jwt *jwtgenerator.JWTGenerator) (int64, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return -1, status.Error(codes.Unauthenticated, "missing metadata")
@@ -59,7 +59,7 @@ func Authorize(ctx context.Context, jwt *jwtgenerator.JwtGenerator) (int64, erro
 	return userID, nil
 }
 
-func StreamServer(jwt *jwtgenerator.JwtGenerator) grpc.StreamServerInterceptor {
+func StreamServer(jwt *jwtgenerator.JWTGenerator) grpc.StreamServerInterceptor {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		ctx := ss.Context()
 		procName := info.FullMethod[strings.LastIndex(info.FullMethod, ".")+1:]
@@ -82,7 +82,7 @@ func StreamServer(jwt *jwtgenerator.JwtGenerator) grpc.StreamServerInterceptor {
 	}
 }
 
-func UnaryServer(jwt *jwtgenerator.JwtGenerator) grpc.UnaryServerInterceptor {
+func UnaryServer(jwt *jwtgenerator.JWTGenerator) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		procName := info.FullMethod[strings.LastIndex(info.FullMethod, ".")+1:]
 		if _, ok := procExclusions[procName]; !ok {

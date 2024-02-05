@@ -33,7 +33,7 @@ func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error { // TOD
 func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string][]byte, error) {
 	res := make(map[string][]byte)
 
-	for k, _ := range binFilesList {
+	for k := range binFilesList {
 		fileBytes, err := os.ReadFile(filepath.Join(bm.path, k))
 		if err != nil {
 			return nil, fmt.Errorf("read binary file: %w", err)

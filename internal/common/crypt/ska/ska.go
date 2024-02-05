@@ -15,8 +15,8 @@ type AESKeyLength int
 
 const (
 	Key16 = AESKeyLength(16)
-	Key24 = AESKeyLength(24)
-	Key32 = AESKeyLength(32)
+	// Key24 = AESKeyLength(24)
+	// Key32 = AESKeyLength(32)
 )
 
 type SKA struct {

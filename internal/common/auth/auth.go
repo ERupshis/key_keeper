@@ -19,13 +19,13 @@ const (
 
 type Config struct {
 	Storage storage.BaseAuthStorage
-	JWT     *jwtgenerator.JwtGenerator
+	JWT     *jwtgenerator.JWTGenerator
 	Hasher  *hasher.Hasher
 }
 
 type Manager struct {
 	storage storage.BaseAuthStorage
-	jwt     *jwtgenerator.JwtGenerator
+	jwt     *jwtgenerator.JWTGenerator
 	hasher  *hasher.Hasher
 }
 

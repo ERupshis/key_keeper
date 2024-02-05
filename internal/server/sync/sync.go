@@ -52,8 +52,7 @@ func (c *Controller) Push(stream pb.Sync_PushServer) error {
 	}
 
 	for {
-		tmpReceive := &pb.PushRequest{}
-		tmpReceive, err = stream.Recv()
+		tmpReceive, err := stream.Recv()
 		if err != nil {
 			break
 		}
@@ -78,6 +77,10 @@ func (c *Controller) Pull(_ *emptypb.Empty, stream pb.Sync_PullServer) error {
 	}
 
 	userRecords, err := c.storage.GetRecords(stream.Context(), userID)
+	if err != nil {
+		return fmt.Errorf("pull records: %w", err)
+	}
+
 	for idx := range userRecords {
 		err = stream.Send(&pb.PullResponse{Record: clientModels.ConvertStorageRecordToGRPC(&userRecords[idx])})
 		if err != nil {
@@ -196,7 +199,7 @@ func getUserID(ctx context.Context) (int64, error) {
 		return -1, status.Errorf(codes.Unauthenticated, "missing user id") // TODO: extract error.
 	}
 
-	userID, err := strconv.ParseInt(fmt.Sprintf("%s", rawUserID[0]), 10, 64)
+	userID, err := strconv.ParseInt(rawUserID[0], 10, 64)
 	if err != nil {
 		return -1, status.Errorf(codes.InvalidArgument, "bad user id") // TODO: extract error.
 	}

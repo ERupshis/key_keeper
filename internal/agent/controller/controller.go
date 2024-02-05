@@ -70,7 +70,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 			case utils.CommandHelp:
 				c.cmds.Help()
 			case utils.CommandServer:
-				c.cmds.Server(ctx, commandParts, c.inmemory)
+				c.cmds.Server(ctx, commandParts)
 				c.local.SyncBinaries()
 			case utils.CommandUpdate:
 				c.cmds.Update(commandParts, c.inmemory)

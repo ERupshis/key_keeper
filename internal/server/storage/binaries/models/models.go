@@ -24,9 +24,10 @@ type Object struct {
 }
 
 type ObjectStat struct {
-	// An ETag is optionally set to md5sum of an object.  In case of multipart objects,
-	// ETag is of the form MD5SUM-N where MD5SUM is md5sum of all individual md5sums of
-	// each parts concatenated into one string.
+	// An ETag is optionally set to md5sum of an object.
+	// In the case of multipart objects,
+	// ETag is of the form MD5SUM-N where MD5SUM is md5sum all individual md5sums of
+	// each part concatenated into one string.
 	ETag string `json:"etag"`
 
 	Key          string    `json:"name"`         // Name of the object
