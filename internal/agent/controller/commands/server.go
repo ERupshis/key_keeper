@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 )
 
-func (c *Commands) Server(ctx context.Context, parts []string, storage *inmemory.Storage) {
+func (c *Commands) Server(ctx context.Context, parts []string) {
 	supportedTypes := []string{utils.CommandPush, utils.CommandPull, utils.CommandLogin, utils.CommandRegister}
 	if len(parts) != 2 {
 		c.iactr.Printf("incorrect request. should contain command '%s' and action type(%s)\n", utils.CommandServer, supportedTypes)

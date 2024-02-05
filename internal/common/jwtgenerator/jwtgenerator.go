@@ -14,25 +14,25 @@ type Claims struct {
 }
 
 // JWTGenerator generator itself.
-type JwtGenerator struct {
+type JWTGenerator struct {
 	jwtKey   string
 	tokenExp int
 }
 
 // NewJWTGenerator creates JWT tokens generator.
-func NewJWTGenerator(jwtKey string, tokenExp int) (*JwtGenerator, error) {
+func NewJWTGenerator(jwtKey string, tokenExp int) (*JWTGenerator, error) {
 	if jwtKey == "" {
 		return nil, fmt.Errorf("jwt key is not set")
 	}
 
-	return &JwtGenerator{
+	return &JWTGenerator{
 		jwtKey:   jwtKey,
 		tokenExp: tokenExp,
 	}, nil
 }
 
 // BuildJWTString creates token and returns it as string.
-func (j *JwtGenerator) BuildJWTString(userID int64) (string, error) {
+func (j *JWTGenerator) BuildJWTString(userID int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(j.tokenExp) * time.Hour)),
@@ -49,7 +49,7 @@ func (j *JwtGenerator) BuildJWTString(userID int64) (string, error) {
 }
 
 // GetUserID gets token in string format, parse it and returns userID.
-func (j *JwtGenerator) GetUserID(tokenString string) (int64, error) {
+func (j *JWTGenerator) GetUserID(tokenString string) (int64, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {

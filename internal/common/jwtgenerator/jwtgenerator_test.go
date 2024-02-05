@@ -60,7 +60,7 @@ func TestJwtGenerator_Overall(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			j := &JwtGenerator{
+			j := &JWTGenerator{
 				jwtKey:   tt.fields.jwtKey,
 				tokenExp: tt.fields.tokenExp,
 			}
