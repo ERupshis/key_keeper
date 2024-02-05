@@ -15,7 +15,7 @@ func (p *Postgres) AddUser(ctx context.Context, user *models.User) error {
 
 	result, err := retrier.RetryCallWithTimeout(ctx, []int{1, 1, 3}, db.DatabaseErrorsToRetry, exec)
 	if err != nil {
-		return fmt.Errorf("add user  '%d': %w", user.Login, err)
+		return fmt.Errorf("add user  '%s': %w", user.Login, err)
 	}
 
 	rows, err := result.RowsAffected()
