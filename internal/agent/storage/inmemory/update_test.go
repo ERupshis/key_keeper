@@ -35,9 +35,9 @@ func TestStorage_UpdateRecord(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -56,9 +56,9 @@ func TestStorage_UpdateRecord(t *testing.T) {
 			name: "missing id in storage",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,

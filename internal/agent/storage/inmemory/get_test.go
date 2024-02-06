@@ -34,9 +34,9 @@ func TestStorage_GetRecord(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -53,9 +53,9 @@ func TestStorage_GetRecord(t *testing.T) {
 			name: "incorrect id",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -106,18 +106,18 @@ func TestStorage_GetAllRecords(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
 			},
 			want: want{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
 				},
 				err: assert.NoError,
 			},

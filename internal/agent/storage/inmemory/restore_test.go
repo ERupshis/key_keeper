@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/erupshis/key_keeper/internal/agent/models"
+	models "github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
 	"github.com/stretchr/testify/assert"
 )
@@ -40,18 +40,18 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			},
 			args: args{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{-2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: -2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 			want: want{
 				err: assert.NoError,
 				idx: -2,
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{-2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: -2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 		},
@@ -59,30 +59,30 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "already with records",
 			fields: fields{
 				records: []models.Record{
-					{-1, models.Data{}, false, time.Now()},
-					{-2, models.Data{}, false, time.Now()},
-					{-3, models.Data{}, false, time.Now()},
+					{ID: -1, UpdatedAt: time.Now()},
+					{ID: -2, UpdatedAt: time.Now()},
+					{ID: -3, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
 			},
 			args: args{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 			want: want{
 				err: assert.NoError,
 				idx: -3,
 				records: []models.Record{
-					{-1, models.Data{}, false, time.Now()},
-					{-2, models.Data{}, false, time.Now()},
-					{-3, models.Data{}, false, time.Now()},
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: -1, UpdatedAt: time.Now()},
+					{ID: -2, UpdatedAt: time.Now()},
+					{ID: -3, UpdatedAt: time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 		},
@@ -90,9 +90,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "no new records",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -104,9 +104,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 				err: assert.NoError,
 				idx: 0,
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 		},
@@ -114,9 +114,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "no new records 2",
 			fields: fields{
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -128,9 +128,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 				err: assert.NoError,
 				idx: 0,
 				records: []models.Record{
-					{1, models.Data{}, false, time.Now()},
-					{2, models.Data{}, false, time.Now()},
-					{3, models.Data{}, false, time.Now()},
+					{ID: 1, UpdatedAt: time.Now()},
+					{ID: 2, UpdatedAt: time.Now()},
+					{ID: 3, UpdatedAt: time.Now()},
 				},
 			},
 		},
