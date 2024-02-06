@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type BinaryManager struct {
@@ -20,26 +22,41 @@ func (bm *BinaryManager) SetPath(newPath string) {
 }
 
 func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error { // TODO:need to add goroutine and return channel.
+	g := errgroup.Group{}
 	for k, v := range binaries {
-		err := os.WriteFile(filepath.Join(bm.path, k), v, 0666)
-		if err != nil {
-			return fmt.Errorf("save binary file '%s' locally: %w", k, err)
-		}
+		g.Go(func() error {
+			if err := os.WriteFile(filepath.Join(bm.path, k), v, 0666); err != nil {
+				return fmt.Errorf("save binary file '%s' locally: %w", k, err)
+			}
+
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf("save binary file locally: %w", err)
 	}
 
 	return nil
 }
 
 func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string][]byte, error) {
+	g := errgroup.Group{}
 	res := make(map[string][]byte)
-
 	for k := range binFilesList {
-		fileBytes, err := os.ReadFile(filepath.Join(bm.path, k))
-		if err != nil {
-			return nil, fmt.Errorf("read binary file: %w", err)
-		}
+		g.Go(func() error {
+			fileBytes, err := os.ReadFile(filepath.Join(bm.path, k))
+			if err != nil {
+				return fmt.Errorf("read binary file: %w", err)
+			}
 
-		res[k] = fileBytes
+			res[k] = fileBytes
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	return res, nil
@@ -56,15 +73,20 @@ func (bm *BinaryManager) SyncFiles(actualFiles map[string]struct{}) error {
 		return fmt.Errorf("create list of bin files: %w", err)
 	}
 
+	g := errgroup.Group{}
 	for _, fileName := range binFiles {
 		if _, ok := actualFiles[filepath.Base(fileName)]; !ok {
-			if err := os.Remove(fileName); err != nil {
-				return fmt.Errorf("remove unused bin file: %w", err)
-			}
+			g.Go(func() error {
+				if err := os.Remove(fileName); err != nil {
+					return fmt.Errorf("remove unused bin file: %w", err)
+				}
+
+				return nil
+			})
 		}
 	}
 
-	return nil
+	return g.Wait()
 }
 
 func checkFile(path string, binFiles *[]string) error {
