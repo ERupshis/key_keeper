@@ -157,7 +157,7 @@ func TestStorage_GetAllRecords(t *testing.T) {
 				freeIdx:     tt.fields.freeIdx,
 			}
 			got, err := s.GetAllRecords()
-			if !tt.want.err(t, err, fmt.Sprintf("GetAllRecords()")) {
+			if !tt.want.err(t, err, "GetAllRecords()") {
 				return
 			}
 			assert.Equalf(t, tt.want.records, got, "GetAllRecords()")
@@ -382,18 +382,204 @@ func TestStorage_GetBinFilesList(t *testing.T) {
 	}{
 		{
 			name: "base",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+			},
+			want: map[string]struct{}{
+				"binary file 1": {},
+				"binary file 3": {},
+			},
+		},
+		{
+			name: "deleted",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: true, UpdatedAt: time.Now()},
+				},
+				cryptHasher: nil,
+				freeIdx:     -6,
+			},
 			want: map[string]struct{}{},
 		},
-		// TODO: need to add cases.
+		{
+			name: "no binaries",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+				},
+			},
+			want: map[string]struct{}{},
+		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			s := &Storage{
 				records:     tt.fields.records,
 				cryptHasher: tt.fields.cryptHasher,
 				freeIdx:     tt.fields.freeIdx,
 			}
 			assert.Equalf(t, tt.want, s.GetBinFilesList(), "GetBinFilesList()")
+		})
+	}
+}
+
+func TestStorage_GetRecords(t *testing.T) {
+	type fields struct {
+		records     []models.Record
+		cryptHasher *ska.SKA
+		freeIdx     int64
+	}
+	type args struct {
+		recordType models.RecordType
+		filters    map[string]string
+	}
+	type want struct {
+		records []models.Record
+		err     assert.ErrorAssertionFunc
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   want
+	}{
+		{
+			name: "base",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				cryptHasher: nil,
+				freeIdx:     -6,
+			},
+			args: args{
+				recordType: models.TypeBinary,
+				filters:    nil,
+			},
+			want: want{
+				records: []models.Record{
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				err: assert.NoError,
+			},
+		},
+		{
+			name: "any",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				cryptHasher: nil,
+				freeIdx:     -6,
+			},
+			args: args{
+				recordType: models.TypeAny,
+				filters:    nil,
+			},
+			want: want{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				err: assert.NoError,
+			},
+		},
+		{
+			name: "filters",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				cryptHasher: nil,
+				freeIdx:     -6,
+			},
+			args: args{
+				recordType: models.TypeAny,
+				filters:    map[string]string{"key1": "val"},
+			},
+			want: want{
+				records: []models.Record{
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				err: assert.NoError,
+			},
+		},
+		{
+			name: "filters any",
+			fields: fields{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				cryptHasher: nil,
+				freeIdx:     -6,
+			},
+			args: args{
+				recordType: models.TypeAny,
+				filters:    map[string]string{"any": "val"},
+			},
+			want: want{
+				records: []models.Record{
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+				},
+				err: assert.NoError,
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &Storage{
+				records:     tt.fields.records,
+				cryptHasher: tt.fields.cryptHasher,
+				freeIdx:     tt.fields.freeIdx,
+			}
+			got, err := s.GetRecords(tt.args.recordType, tt.args.filters)
+			if !tt.want.err(t, err, fmt.Sprintf("GetRecords(%v, %v)", tt.args.recordType, tt.args.filters)) {
+				return
+			}
+			assert.Equalf(t, tt.want.records, got, "GetRecords(%v, %v)", tt.args.recordType, tt.args.filters)
 		})
 	}
 }

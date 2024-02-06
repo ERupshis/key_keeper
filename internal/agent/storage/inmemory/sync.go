@@ -3,6 +3,7 @@ package inmemory
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
@@ -35,15 +36,15 @@ func (s *Storage) GetAllRecordsForServer() ([]localModels.StorageRecord, error) 
 }
 
 func (s *Storage) RemoveLocalRecords() error {
-	recordsToRemoveCount := 0
-	for idx := range s.records {
-		if s.records[idx].ID <= 0 {
-			s.records[idx], s.records[len(s.records)-1-recordsToRemoveCount] = s.records[len(s.records)-1-recordsToRemoveCount], s.records[idx]
-			recordsToRemoveCount++
-		}
-	}
+	sort.Slice(s.records, func(l, r int) bool {
+		return s.records[l].ID > s.records[r].ID
+	})
 
-	s.records = s.records[:(len(s.records) - recordsToRemoveCount)]
+	trimIdx := sort.Search(len(s.records), func(idx int) bool {
+		return s.records[idx].ID < 0
+	})
+
+	s.records = s.records[:trimIdx]
 	s.resetNextFreeIdx()
 	return nil
 }
