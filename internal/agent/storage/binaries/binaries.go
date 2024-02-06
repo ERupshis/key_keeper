@@ -24,6 +24,7 @@ func (bm *BinaryManager) SetPath(newPath string) {
 func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error { // TODO:need to add goroutine and return channel.
 	g := errgroup.Group{}
 	for k, v := range binaries {
+		k, v := k, v
 		g.Go(func() error {
 			if err := os.WriteFile(filepath.Join(bm.path, k), v, 0666); err != nil {
 				return fmt.Errorf("save binary file '%s' locally: %w", k, err)
@@ -44,6 +45,7 @@ func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string]
 	g := errgroup.Group{}
 	res := make(map[string][]byte)
 	for k := range binFilesList {
+		k := k
 		g.Go(func() error {
 			fileBytes, err := os.ReadFile(filepath.Join(bm.path, k))
 			if err != nil {
@@ -75,6 +77,7 @@ func (bm *BinaryManager) SyncFiles(actualFiles map[string]struct{}) error {
 
 	g := errgroup.Group{}
 	for _, fileName := range binFiles {
+		fileName := fileName
 		if _, ok := actualFiles[filepath.Base(fileName)]; !ok {
 			g.Go(func() error {
 				if err := os.Remove(fileName); err != nil {
