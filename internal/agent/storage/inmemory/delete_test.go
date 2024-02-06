@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
@@ -35,9 +34,9 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -47,9 +46,9 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: true},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -58,9 +57,9 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			name: "negative id",
 			fields: fields{
 				records: []models.Record{
-					{ID: -1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -1,
@@ -70,8 +69,8 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -80,9 +79,9 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			name: "wrong id",
 			fields: fields{
 				records: []models.Record{
-					{ID: -1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -1,
@@ -92,9 +91,9 @@ func TestStorage_DeleteRecord(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: -1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: -1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				err: assert.Error,
 			},
