@@ -44,6 +44,7 @@ func (s *Storage) RemoveLocalRecords() error {
 	}
 
 	s.records = s.records[:(len(s.records) - recordsToRemoveCount)]
+	s.resetNextFreeIdx()
 	return nil
 }
 

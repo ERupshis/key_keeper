@@ -17,6 +17,14 @@ func NewStorage(cryptHasher *ska.SKA) *Storage {
 		cryptHasher: cryptHasher,
 	}
 }
+func (s *Storage) resetNextFreeIdx() {
+	minIdx := int64(0)
+	for _, record := range s.records {
+		minIdx = min(minIdx, record.ID)
+	}
+
+	s.freeIdx = minIdx
+}
 
 func (s *Storage) getNextFreeIdx() int64 {
 	s.freeIdx--

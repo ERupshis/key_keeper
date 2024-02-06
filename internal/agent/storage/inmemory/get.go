@@ -55,7 +55,7 @@ func canRecordBeReturned(record *models.Record, recordType models.RecordType) bo
 		return false
 	}
 
-	if record.Data.RecordType != recordType && !(recordType == models.TypeAny) {
+	if record.Data.RecordType != recordType && recordType != models.TypeAny {
 		return false
 	}
 
