@@ -3,7 +3,6 @@ package inmemory
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
@@ -41,7 +40,7 @@ func TestStorage_AddRecord(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: -1, Data: models.Data{RecordType: models.TypeText}, UpdatedAt: time.UnixMilli(0)},
+					{ID: -1, Data: models.Data{RecordType: models.TypeText}},
 				},
 				err: assert.NoError,
 			},
@@ -57,7 +56,6 @@ func TestStorage_AddRecord(t *testing.T) {
 			tt.want.err(t, s.AddRecord(tt.args.record), fmt.Sprintf("AddRecord(%v)", tt.args.record))
 			assert.Equal(t, tt.want.records[0].ID, s.records[0].ID)
 			assert.Equal(t, tt.want.records[0].Data.RecordType, s.records[0].Data.RecordType)
-			assert.NotEqual(t, tt.want.records[0].UpdatedAt, s.records[0].UpdatedAt)
 		})
 	}
 }
