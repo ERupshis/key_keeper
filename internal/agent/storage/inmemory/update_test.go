@@ -36,8 +36,8 @@ func TestStorage_UpdateRecord(t *testing.T) {
 			fields: fields{
 				records: []models.Record{
 					{ID: 1, UpdatedAt: time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -57,8 +57,8 @@ func TestStorage_UpdateRecord(t *testing.T) {
 			fields: fields{
 				records: []models.Record{
 					{ID: 1, UpdatedAt: time.Date(2023, time.January, 11, 12, 0, 0, 0, time.UTC)},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,

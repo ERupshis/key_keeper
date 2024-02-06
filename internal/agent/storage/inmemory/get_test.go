@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
@@ -34,9 +33,9 @@ func TestStorage_GetRecord(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -45,7 +44,7 @@ func TestStorage_GetRecord(t *testing.T) {
 				id: 1,
 			},
 			want: want{
-				record: &models.Record{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+				record: &models.Record{ID: 1, Data: models.Data{}, Deleted: false},
 				err:    assert.NoError,
 			},
 		},
@@ -53,9 +52,9 @@ func TestStorage_GetRecord(t *testing.T) {
 			name: "incorrect id",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -106,18 +105,18 @@ func TestStorage_GetAllRecords(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -178,7 +177,7 @@ func Test_isSomeRecordMetaDataHasValue(t *testing.T) {
 		{
 			name: "base",
 			args: args{
-				record: &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record: &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				val:    "val",
 			},
 			want: true,
@@ -186,7 +185,7 @@ func Test_isSomeRecordMetaDataHasValue(t *testing.T) {
 		{
 			name: "missing filter",
 			args: args{
-				record: &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record: &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				val:    "val missing",
 			},
 			want: false,
@@ -194,7 +193,7 @@ func Test_isSomeRecordMetaDataHasValue(t *testing.T) {
 		{
 			name: "missing meta data",
 			args: args{
-				record: &models.Record{ID: 1, Data: models.Data{}, UpdatedAt: time.Now()},
+				record: &models.Record{ID: 1, Data: models.Data{}},
 				val:    "val",
 			},
 			want: false,
@@ -222,7 +221,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "base",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				filters: map[string]string{"12": "val"},
 			},
 			want: true,
@@ -230,7 +229,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "mismatch meta value",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				filters: map[string]string{"12": "value"},
 			},
 			want: false,
@@ -238,7 +237,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "mismatch meta key",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				filters: map[string]string{"key": "val"},
 			},
 			want: false,
@@ -246,7 +245,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "any as meta key",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				filters: map[string]string{"any": "val"},
 			},
 			want: true,
@@ -254,7 +253,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "any as meta key, mismatch value",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val"}}},
 				filters: map[string]string{"any": "value"},
 			},
 			want: false,
@@ -262,7 +261,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "base two filters",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}},
 				filters: map[string]string{"12": "val", "13": "value"},
 			},
 			want: true,
@@ -270,7 +269,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "base one filter, 2 meta values in record",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "val"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "val"}}},
 				filters: map[string]string{"13": "val"},
 			},
 			want: true,
@@ -278,7 +277,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "any as meta key, 2 meta values in record",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}},
 				filters: map[string]string{"any": "value"},
 			},
 			want: true,
@@ -286,7 +285,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "two filters. one filter is any, 2 meta values in record. second filter mismatch",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}},
 				filters: map[string]string{"any": "value", "12": "value"},
 			},
 			want: false,
@@ -294,7 +293,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "two filters. one filter is any, 2 meta values in record. second filter match",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}},
 				filters: map[string]string{"any": "value", "12": "val"},
 			},
 			want: true,
@@ -302,7 +301,7 @@ func Test_isRecordMatchToFilters(t *testing.T) {
 		{
 			name: "two filters. one filter is any, 2 meta values in record. both filters satisfy one meta value",
 			args: args{
-				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}, UpdatedAt: time.Now()},
+				record:  &models.Record{ID: 1, Data: models.Data{MetaData: models.MetaData{"12": "val", "13": "value"}}},
 				filters: map[string]string{"any": "value", "13": "value"},
 			},
 			want: true,
@@ -330,7 +329,7 @@ func Test_canRecordBeReturned(t *testing.T) {
 		{
 			name: "base",
 			args: args{
-				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, UpdatedAt: time.Now()},
+				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}},
 				recordType: models.TypeText,
 			},
 			want: true,
@@ -338,7 +337,7 @@ func Test_canRecordBeReturned(t *testing.T) {
 		{
 			name: "deleted record",
 			args: args{
-				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: true, UpdatedAt: time.Now()},
+				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: true},
 				recordType: models.TypeText,
 			},
 			want: false,
@@ -346,7 +345,7 @@ func Test_canRecordBeReturned(t *testing.T) {
 		{
 			name: "incorrect type",
 			args: args{
-				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: false, UpdatedAt: time.Now()},
+				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: false},
 				recordType: models.TypeBinary,
 			},
 			want: false,
@@ -354,7 +353,7 @@ func Test_canRecordBeReturned(t *testing.T) {
 		{
 			name: "any type",
 			args: args{
-				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: false, UpdatedAt: time.Now()},
+				record:     &models.Record{ID: 1, Data: models.Data{RecordType: models.TypeText}, Deleted: false},
 				recordType: models.TypeAny,
 			},
 			want: true,
@@ -384,12 +383,12 @@ func TestStorage_GetBinFilesList(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 			},
 			want: map[string]struct{}{
@@ -401,12 +400,12 @@ func TestStorage_GetBinFilesList(t *testing.T) {
 			name: "deleted",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: true, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: true},
 				},
 				cryptHasher: nil,
 				freeIdx:     -6,
@@ -417,9 +416,9 @@ func TestStorage_GetBinFilesList(t *testing.T) {
 			name: "no binaries",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 5, Data: models.Data{}, Deleted: false},
 				},
 			},
 			want: map[string]struct{}{},
@@ -463,12 +462,12 @@ func TestStorage_GetRecords(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -6,
@@ -479,8 +478,8 @@ func TestStorage_GetRecords(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -489,12 +488,12 @@ func TestStorage_GetRecords(t *testing.T) {
 			name: "any",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -6,
@@ -505,11 +504,11 @@ func TestStorage_GetRecords(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -518,12 +517,12 @@ func TestStorage_GetRecords(t *testing.T) {
 			name: "filters",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -6,
@@ -534,7 +533,7 @@ func TestStorage_GetRecords(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false},
 				},
 				err: assert.NoError,
 			},
@@ -543,12 +542,12 @@ func TestStorage_GetRecords(t *testing.T) {
 			name: "filters any",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 3, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true, UpdatedAt: time.Now()},
-					{ID: 5, Data: models.Data{}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false},
+					{ID: 3, Data: models.Data{}, Deleted: false},
+					{ID: 4, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}}, Deleted: true},
+					{ID: 5, Data: models.Data{}, Deleted: false},
+					{ID: -6, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 3"}}, Deleted: false},
 				},
 				cryptHasher: nil,
 				freeIdx:     -6,
@@ -559,8 +558,8 @@ func TestStorage_GetRecords(t *testing.T) {
 			},
 			want: want{
 				records: []models.Record{
-					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false, UpdatedAt: time.Now()},
-					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false, UpdatedAt: time.Now()},
+					{ID: 1, Data: models.Data{MetaData: map[string]string{"key2": "val"}}, Deleted: false},
+					{ID: 2, Data: models.Data{RecordType: models.TypeBinary, Binary: &models.Binary{SecuredFileName: "binary file 1"}, MetaData: map[string]string{"key1": "val"}}, Deleted: false},
 				},
 				err: assert.NoError,
 			},

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 
 	models "github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
@@ -40,18 +39,18 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			},
 			args: args{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: -2},
+					{ID: 3},
 				},
 			},
 			want: want{
 				err: assert.NoError,
 				idx: -2,
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: -2},
+					{ID: 3},
 				},
 			},
 		},
@@ -59,30 +58,30 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "already with records",
 			fields: fields{
 				records: []models.Record{
-					{ID: -1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: -3, UpdatedAt: time.Now()},
+					{ID: -1},
+					{ID: -2},
+					{ID: -3},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
 			},
 			args: args{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 			},
 			want: want{
 				err: assert.NoError,
 				idx: -3,
 				records: []models.Record{
-					{ID: -1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: -3, UpdatedAt: time.Now()},
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: -1},
+					{ID: -2},
+					{ID: -3},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 			},
 		},
@@ -90,9 +89,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "no new records",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -104,9 +103,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 				err: assert.NoError,
 				idx: 0,
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 			},
 		},
@@ -114,9 +113,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 			name: "no new records 2",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 				freeIdx:     0,
@@ -128,9 +127,9 @@ func TestStorage_RestoreRecords(t *testing.T) {
 				err: assert.NoError,
 				idx: 0,
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 			},
 		},

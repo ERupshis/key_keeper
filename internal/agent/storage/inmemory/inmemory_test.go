@@ -2,7 +2,6 @@ package inmemory
 
 import (
 	"testing"
-	"time"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/common/crypt/ska"
@@ -57,9 +56,9 @@ func TestStorage_resetNextFreeIdx(t *testing.T) {
 			name: "base",
 			fields: fields{
 				records: []models.Record{
-					{ID: -1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: -3, UpdatedAt: time.Now()},
+					{ID: -1},
+					{ID: -2},
+					{ID: -3},
 				},
 				cryptHasher: nil,
 			},
@@ -72,9 +71,9 @@ func TestStorage_resetNextFreeIdx(t *testing.T) {
 			name: "only synced records",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: 2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: 2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 			},
@@ -98,9 +97,9 @@ func TestStorage_resetNextFreeIdx(t *testing.T) {
 			name: "mixed records",
 			fields: fields{
 				records: []models.Record{
-					{ID: 1, UpdatedAt: time.Now()},
-					{ID: -2, UpdatedAt: time.Now()},
-					{ID: 3, UpdatedAt: time.Now()},
+					{ID: 1},
+					{ID: -2},
+					{ID: 3},
 				},
 				cryptHasher: nil,
 			},
