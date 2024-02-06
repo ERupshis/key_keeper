@@ -3,16 +3,16 @@ package interactor
 import (
 	"bufio"
 	"fmt"
-	"os"
+	"io"
 )
 
 type Reader struct {
 	*bufio.Reader
 }
 
-func NewReader(stream *os.File) *Reader {
+func NewReader(reader io.Reader) *Reader {
 	return &Reader{
-		Reader: bufio.NewReader(stream),
+		Reader: bufio.NewReader(reader),
 	}
 }
 

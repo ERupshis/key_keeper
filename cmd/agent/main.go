@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -57,9 +58,9 @@ func main() {
 	}
 	defer deferutils.ExecSilent(logs.Sync)
 
-	reader := interactor.NewReader(os.Stdin)
-	writer := interactor.NewWriter(os.Stdout)
-	userInteractor := interactor.NewInteractor(reader, writer)
+	reader := interactor.NewReader(bufio.NewReader(os.Stdin))
+	writer := interactor.NewWriter(bufio.NewWriter(os.Stdout))
+	userInteractor := interactor.NewInteractor(reader, writer, logs)
 
 	sm := statemachines.NewStateMachines(userInteractor)
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
