@@ -64,7 +64,7 @@ func TestStorage_GetRecord(t *testing.T) {
 			},
 			want: want{
 				record: nil,
-				err:    assert.NoError,
+				err:    assert.Error,
 			},
 		},
 	}

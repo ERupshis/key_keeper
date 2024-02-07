@@ -11,7 +11,7 @@ func (s *Storage) GetRecord(id int64) (*models.Record, error) {
 		}
 	}
 
-	return nil, nil
+	return nil, ErrRecordNotFound
 }
 
 func (s *Storage) GetAllRecords() ([]models.Record, error) {

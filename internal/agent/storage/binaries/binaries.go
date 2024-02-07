@@ -21,7 +21,7 @@ func (bm *BinaryManager) SetPath(newPath string) {
 	bm.path = newPath
 }
 
-func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error { // TODO:need to add goroutine and return channel.
+func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error {
 	g := errgroup.Group{}
 	for k, v := range binaries {
 		k, v := k, v
