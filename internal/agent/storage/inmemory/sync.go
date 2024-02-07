@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"sync"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
@@ -61,7 +62,10 @@ func (s *Storage) Sync(serverRecords map[int64]localModels.StorageRecord) error 
 
 func (s *Storage) syncLocalRecords(serverRecords map[int64]localModels.StorageRecord) (map[int64]struct{}, error) {
 	syncedRecordsIdxs := map[int64]struct{}{}
+
 	g := errgroup.Group{}
+	mu := sync.Mutex{}
+
 	for idx := range s.records {
 		idx := idx
 		if serverRecord, ok := serverRecords[s.records[idx].ID]; ok {
@@ -77,7 +81,9 @@ func (s *Storage) syncLocalRecords(serverRecords map[int64]localModels.StorageRe
 					s.records[idx].Deleted = serverRecord.Deleted
 				}
 
+				mu.Lock()
 				syncedRecordsIdxs[serverRecord.ID] = struct{}{}
+				mu.Unlock()
 				return nil
 			})
 
