@@ -8,6 +8,7 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/models"
+	"github.com/erupshis/key_keeper/internal/agent/utils"
 	"github.com/erupshis/key_keeper/internal/agent/utils/testutils"
 	"github.com/erupshis/key_keeper/internal/common/logger"
 	"github.com/stretchr/testify/assert"
@@ -15,8 +16,6 @@ import (
 
 const (
 	someText = "some text"
-	empty    = ""
-	cancel   = "cancel"
 )
 
 func TestText_stateInitial(t *testing.T) {
@@ -103,7 +102,7 @@ func TestText_stateData(t *testing.T) {
 		{
 			name: "empty",
 			fields: fields{
-				rd: bytes.NewReader([]byte(testutils.AddNewRow(empty))),
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(""))),
 				wr: bytes.NewBuffer(nil),
 				sm: nil,
 			},
@@ -112,7 +111,7 @@ func TestText_stateData(t *testing.T) {
 			},
 			want: want{
 				response: []byte("entered credential models: {Data:}\n"),
-				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: empty}}},
+				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: ""}}},
 				state:    addFinishState,
 				err:      assert.NoError,
 			},
@@ -120,7 +119,7 @@ func TestText_stateData(t *testing.T) {
 		{
 			name: "cancel",
 			fields: fields{
-				rd: bytes.NewReader([]byte(testutils.AddNewRow(cancel))),
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(utils.CommandCancel))),
 				wr: bytes.NewBuffer(nil),
 				sm: nil,
 			},
@@ -211,7 +210,7 @@ func TestText_addMainData(t *testing.T) {
 		{
 			name: "empty",
 			fields: fields{
-				rd: bytes.NewReader([]byte(testutils.AddNewRow(empty))),
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(""))),
 				wr: bytes.NewBuffer(nil),
 				sm: nil,
 			},
@@ -220,14 +219,14 @@ func TestText_addMainData(t *testing.T) {
 			},
 			want: want{
 				response: []byte("enter text to save: entered credential models: {Data:}\n"),
-				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: empty}}},
+				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: ""}}},
 				err:      assert.NoError,
 			},
 		},
 		{
 			name: "cancel",
 			fields: fields{
-				rd: bytes.NewReader([]byte(testutils.AddNewRow(cancel))),
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(utils.CommandCancel))),
 				wr: bytes.NewBuffer(nil),
 				sm: nil,
 			},
