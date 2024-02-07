@@ -10,12 +10,7 @@ import (
 )
 
 func (b *BankCard) ProcessAddCommand(record *models.Record) error {
-	record.Data.BankCard = &models.BankCard{
-		Number:     "XXXX XXXX XXXX XXXX",
-		Expiration: "XX/XX",
-		CVV:        "XXX or XXXX",
-		Name:       "",
-	}
+	record.Data.BankCard = getBankCardDataTemplate()
 	record.Data.RecordType = models.TypeBankCard
 
 	cfg := statemachines.AddConfig{
@@ -94,8 +89,6 @@ func (b *BankCard) stateInitial(record *models.Record) addState {
 
 func (b *BankCard) stateNumber(record *models.Record) (addState, error) {
 	cardNumber, ok, err := b.iactr.GetUserInputAndValidate(regexNumber)
-	record.Data.BankCard.Number = cardNumber
-
 	if !ok {
 		return addNumberState, err
 	}
@@ -104,6 +97,7 @@ func (b *BankCard) stateNumber(record *models.Record) (addState, error) {
 		return addNumberState, err
 	}
 
+	record.Data.BankCard.Number = cardNumber
 	b.iactr.Printf("enter card expiration (%s): ", record.Data.BankCard.Expiration)
 	return addExpirationState, err
 
@@ -111,7 +105,6 @@ func (b *BankCard) stateNumber(record *models.Record) (addState, error) {
 
 func (b *BankCard) stateExpiration(record *models.Record) (addState, error) {
 	cardExpiration, ok, err := b.iactr.GetUserInputAndValidate(regexExpirationDate)
-	record.Data.BankCard.Expiration = cardExpiration
 	if !ok {
 		return addExpirationState, err
 	}
@@ -120,14 +113,13 @@ func (b *BankCard) stateExpiration(record *models.Record) (addState, error) {
 		return addExpirationState, err
 	}
 
+	record.Data.BankCard.Expiration = cardExpiration
 	b.iactr.Printf("enter card CVV (%s): ", record.Data.BankCard.CVV)
 	return addCVVState, err
 }
 
 func (b *BankCard) stateCVV(record *models.Record) (addState, error) {
 	cardCVV, ok, err := b.iactr.GetUserInputAndValidate(regexCVV)
-	record.Data.BankCard.CVV = cardCVV
-
 	if !ok {
 		return addCVVState, err
 	}
@@ -136,6 +128,7 @@ func (b *BankCard) stateCVV(record *models.Record) (addState, error) {
 		return addCVVState, err
 	}
 
+	record.Data.BankCard.CVV = cardCVV
 	if record.Data.BankCard.Name == "" {
 		b.iactr.Printf("enter card holder name: ")
 	} else {
@@ -146,8 +139,6 @@ func (b *BankCard) stateCVV(record *models.Record) (addState, error) {
 
 func (b *BankCard) stateCardHolder(record *models.Record) (addState, error) {
 	cardHolder, ok, err := b.iactr.GetUserInputAndValidate(regexCardHolder)
-	record.Data.BankCard.Name = cardHolder
-
 	if !ok {
 		return addCardHolderState, err
 	}
@@ -156,6 +147,16 @@ func (b *BankCard) stateCardHolder(record *models.Record) (addState, error) {
 		return addCardHolderState, err
 	}
 
+	record.Data.BankCard.Name = cardHolder
 	b.iactr.Printf("entered card models: %+v\n", *record.Data.BankCard)
 	return addFinishState, err
+}
+
+func getBankCardDataTemplate() *models.BankCard {
+	return &models.BankCard{
+		Number:     "XXXX XXXX XXXX XXXX",
+		Expiration: "XX/XX",
+		CVV:        "XXX or XXXX",
+		Name:       "",
+	}
 }
