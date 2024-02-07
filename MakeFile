@@ -1,4 +1,4 @@
-.PHONY: docker_down docker_up containers proto build coverage size
+.PHONY: docker_down docker_up containers proto build coverage size lint static test
 
 
 docker_down:
@@ -27,6 +27,16 @@ coverage:
 
 size:
 	git ls-files | xargs wc -l
+
+lint:
+	golangci-lint run
+
+static:
+	staticcheck ./...
+
+test:
+	go test -race ./...
+
 
 
 BINARY_NAME=key_keeper
