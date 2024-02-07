@@ -57,8 +57,6 @@ func (t *Text) stateInitial() addState {
 
 func (t *Text) stateData(record *models.Record) (addState, error) {
 	text, ok, err := t.iactr.GetUserInputAndValidate(nil)
-	record.Data.Text.Data = text
-
 	if !ok {
 		return addDataState, err
 	}
@@ -67,6 +65,7 @@ func (t *Text) stateData(record *models.Record) (addState, error) {
 		return addDataState, err
 	}
 
+	record.Data.Text.Data = text
 	t.iactr.Printf("entered credential models: %+v\n", *record.Data.Text)
 	return addFinishState, err
 
