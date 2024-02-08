@@ -716,4 +716,209 @@ func TestBankCard_stateCardHolder(t *testing.T) {
 	}
 }
 
-// TODO: addMainData.
+func TestBankCard_addMainData(t *testing.T) {
+	type fields struct {
+		rd *bytes.Reader
+		wr *bytes.Buffer
+		sm *statemachines.StateMachines
+	}
+	type args struct {
+		record *models.Record
+	}
+	type want struct {
+		response []byte
+		record   *models.Record
+		err      assert.ErrorAssertionFunc
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   want
+	}{
+		{
+			name: "base",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(expirationCorrect) +
+					testutils.AddNewRow(cvvCorrect) +
+					testutils.AddNewRow(cardHolderCorrect)),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): enter card CVV (XXX or XXXX): enter card holder name: entered card models: {Number:1234 1234 1234 1234 Expiration:12/12 CVV:123 Name:Card Holder}\n"),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: expirationCorrect, CVV: cvvCorrect, Name: cardHolderCorrect}}},
+				err:      assert.NoError,
+			},
+		},
+		{
+			name: "cancel on card holder",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(expirationCorrect) +
+					testutils.AddNewRow(cvvCorrect) +
+					testutils.AddNewRow(utils.CommandCancel)),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): enter card CVV (XXX or XXXX): enter card holder name: "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: expirationCorrect, CVV: cvvCorrect}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "cancel on cvv",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(expirationCorrect) +
+					testutils.AddNewRow(utils.CommandCancel)),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): enter card CVV (XXX or XXXX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: expirationCorrect, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "cancel on expiration",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(utils.CommandCancel)),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: tmplExpiration, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "cancel on number",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(utils.CommandCancel))),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: tmplNumber, Expiration: tmplExpiration, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "eof on card holder",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(expirationCorrect) +
+					testutils.AddNewRow(cvvCorrect) +
+					cardHolderCorrect),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): enter card CVV (XXX or XXXX): enter card holder name: "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: expirationCorrect, CVV: cvvCorrect}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "eof on cvv",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					testutils.AddNewRow(expirationCorrect) +
+					cvvCorrect),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): enter card CVV (XXX or XXXX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: expirationCorrect, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "eof on expiration",
+			fields: fields{
+				rd: bytes.NewReader([]byte(testutils.AddNewRow(numberCorrect) +
+					expirationCorrect),
+				),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): enter card expiration (XX/XX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: numberCorrect, Expiration: tmplExpiration, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+		{
+			name: "eof on number",
+			fields: fields{
+				rd: bytes.NewReader([]byte("")),
+				wr: bytes.NewBuffer(nil),
+				sm: nil,
+			},
+			args: args{
+				record: &models.Record{Data: models.Data{BankCard: getBankCardDataTemplate()}},
+			},
+			want: want{
+				response: []byte("enter card number(XXXX XXXX XXXX XXXX): "),
+				record:   &models.Record{Data: models.Data{BankCard: &models.BankCard{Number: tmplNumber, Expiration: tmplExpiration, CVV: tmplCVV}}},
+				err:      assert.Error,
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			iactr := testutils.CreateUserInteractor(tt.fields.rd, tt.fields.wr, logger.CreateMock())
+			card := &BankCard{
+				iactr: iactr,
+				sm:    tt.fields.sm,
+			}
+
+			if !tt.want.err(t, card.addMainData(tt.args.record), fmt.Sprintf("addMainData(%v)", tt.args.record)) {
+				return
+			}
+
+			assert.True(t, reflect.DeepEqual(tt.want.record, tt.args.record))
+			assert.Equal(t, tt.want.response, tt.fields.wr.Bytes())
+		})
+	}
+}
