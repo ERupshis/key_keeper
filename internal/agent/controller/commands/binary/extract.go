@@ -12,17 +12,16 @@ import (
 func (b *Binary) ProcessExtractCommand(record *models.Record) error {
 	cfg := statemachines.ExtractConfig{
 		Record:   record,
-		FileSave: b.fileSave,
+		FileSave: b.saveFile,
 	}
 
 	return b.sm.Extract(cfg)
 }
 
-func (b *Binary) fileSave(record *models.Record, pathToFile string) error {
-	errMsg := "decode and save file from local storage: %w"
+func (b *Binary) saveFile(record *models.Record, pathToFile string) error {
 	fileBytes, err := os.ReadFile(filepath.Join(b.storePath, record.Data.Binary.SecuredFileName))
 	if err != nil {
-		return fmt.Errorf(errMsg, err)
+		return fmt.Errorf("read protected file: %w", err)
 	}
 
 	decryptedFileBytes, err := b.decryptFileAndValidate(fileBytes, record.Data.Binary.SecuredFileName)
@@ -32,7 +31,7 @@ func (b *Binary) fileSave(record *models.Record, pathToFile string) error {
 
 	err = os.WriteFile(filepath.Join(pathToFile, record.Data.Binary.Name), decryptedFileBytes, 0666)
 	if err != nil {
-		return fmt.Errorf(errMsg, err)
+		return fmt.Errorf("save decrypted file: %w", err)
 	}
 
 	b.iactr.Printf("file extracted: %s\n", filepath.Join(pathToFile, record.Data.Binary.Name))

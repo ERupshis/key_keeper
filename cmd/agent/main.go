@@ -67,7 +67,7 @@ func main() {
 	cred := credential.NewCredentials(userInteractor, sm)
 	txt := text.NewText(userInteractor, sm)
 
-	dataCryptor := ska.NewSKA("some user key", ska.Key16)
+	dataCryptor := ska.NewSKA("some user key", ska.Key16) // TODO: need to move param in config.
 	hash := hasher.CreateHasher(cfg.HashKey, hasher.TypeSHA256, logs)
 
 	binaryConfig := binary.Config{
