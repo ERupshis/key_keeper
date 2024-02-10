@@ -53,6 +53,10 @@ func (b *Binary) addMainData(record *models.Record) error {
 		}
 	}
 
+	if currentLocalFile == record.Data.Binary.SecuredFileName {
+		return nil
+	}
+
 	if err = b.removeOldSecuredFile(currentLocalFile); err != nil {
 		return err
 	}
@@ -66,7 +70,7 @@ func (b *Binary) stateInitial() addState {
 }
 
 func (b *Binary) stateFilePath(record *models.Record) (addState, error) {
-	errMsg := "read anf secure binary models: %w"
+	errMsg := "read and secure binary models: %w"
 
 	pathToFile, err := b.getFileNameFromUserInput()
 	if err != nil {
