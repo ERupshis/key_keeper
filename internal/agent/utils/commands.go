@@ -23,6 +23,7 @@ const (
 	CommandID      = "id"
 
 	CommandYes = "yes"
+	CommandNo  = "no"
 
 	MetaSeparator = " : "
 )
