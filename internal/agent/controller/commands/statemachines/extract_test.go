@@ -15,11 +15,11 @@ import (
 )
 
 const (
-	pathAbs    = "C:/data/text.txt"
 	pathNotAbs = "text.txt"
 )
 
 var (
+	pathAbs       = fmt.Sprintf("C:%cdata%ctext.txt", filepath.Separator, filepath.Separator)
 	pathFormatted = fmt.Sprintf("C:%cdata%c", filepath.Separator, filepath.Separator)
 )
 
