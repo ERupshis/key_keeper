@@ -3,6 +3,7 @@ package statemachines
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -19,8 +20,9 @@ const (
 )
 
 var (
-	pathAbs       = fmt.Sprintf("C:%cdata%ctext.txt", filepath.Separator, filepath.Separator)
-	pathFormatted = fmt.Sprintf("C:%cdata%c", filepath.Separator, filepath.Separator)
+	wd, _         = os.Getwd()
+	pathAbs       = fmt.Sprintf("%s%ctext.txt", wd, filepath.Separator)
+	pathFormatted = fmt.Sprintf("%s%c", wd, filepath.Separator)
 )
 
 func TestStateMachines_stateFilePath(t *testing.T) {
