@@ -5,19 +5,19 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	models2 "github.com/erupshis/key_keeper/internal/agent/models"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
 )
 
 func (c *Commands) Add(parts []string, storage *inmemory.Storage) {
-	supportedTypes := []string{models2.StrCredentials, models2.StrBankCard, models2.StrText, models2.StrBinary}
+	supportedTypes := []string{models.StrCredentials, models.StrBankCard, models.StrText, models.StrBinary}
 	if len(parts) != 2 {
 		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandAdd, supportedTypes)
 		return
 	}
 
-	record, err := c.handleAdd(models2.ConvertStringToRecordType(parts[1]), storage)
+	record, err := c.handleAdd(models.ConvertStringToRecordType(parts[1]), storage)
 	if err != nil {
 		c.handleCommandError(err, utils.CommandAdd, supportedTypes)
 		return
@@ -40,20 +40,20 @@ func (c *Commands) handleCommandError(err error, command string, supportedTypes 
 	c.iactr.Printf("\n")
 }
 
-func (c *Commands) handleAdd(recordType models2.RecordType, storage *inmemory.Storage) (*models2.Record, error) {
-	newRecord := &models2.Record{
+func (c *Commands) handleAdd(recordType models.RecordType, storage *inmemory.Storage) (*models.Record, error) {
+	newRecord := &models.Record{
 		ID: -1,
 	}
 
 	var err error
 	switch recordType {
-	case models2.TypeBankCard:
+	case models.TypeBankCard:
 		err = c.bc.ProcessAddCommand(newRecord)
-	case models2.TypeCredentials:
+	case models.TypeCredentials:
 		err = c.creds.ProcessAddCommand(newRecord)
-	case models2.TypeText:
+	case models.TypeText:
 		err = c.text.ProcessAddCommand(newRecord)
-	case models2.TypeBinary:
+	case models.TypeBinary:
 		err = c.binary.ProcessAddCommand(newRecord)
 	default:
 		return nil, fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandAdd, errs.ErrIncorrectRecordType)
