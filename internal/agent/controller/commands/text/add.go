@@ -66,7 +66,7 @@ func (t *Text) stateData(record *models.Record) (addState, error) {
 	}
 
 	record.Data.Text.Data = text
-	t.iactr.Printf("entered credential models: %+v\n", *record.Data.Text)
+	t.iactr.Printf("entered text models: %+v\n", *record.Data.Text)
 	return addFinishState, err
 
 }

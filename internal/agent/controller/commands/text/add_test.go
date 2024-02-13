@@ -93,7 +93,7 @@ func TestText_stateData(t *testing.T) {
 				record: &models.Record{Data: models.Data{Text: &models.Text{}}},
 			},
 			want: want{
-				response: []byte("entered credential models: {Data:some text}\n"),
+				response: []byte("entered text models: {Data:some text}\n"),
 				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: someText}}},
 				state:    addFinishState,
 				err:      assert.NoError,
@@ -110,7 +110,7 @@ func TestText_stateData(t *testing.T) {
 				record: &models.Record{Data: models.Data{Text: &models.Text{}}},
 			},
 			want: want{
-				response: []byte("entered credential models: {Data:}\n"),
+				response: []byte("entered text models: {Data:}\n"),
 				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: ""}}},
 				state:    addFinishState,
 				err:      assert.NoError,
@@ -202,7 +202,7 @@ func TestText_addMainData(t *testing.T) {
 				record: &models.Record{Data: models.Data{Text: &models.Text{}}},
 			},
 			want: want{
-				response: []byte("enter text to save: entered credential models: {Data:some text}\n"),
+				response: []byte("enter text to save: entered text models: {Data:some text}\n"),
 				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: someText}}},
 				err:      assert.NoError,
 			},
@@ -218,7 +218,7 @@ func TestText_addMainData(t *testing.T) {
 				record: &models.Record{Data: models.Data{Text: &models.Text{}}},
 			},
 			want: want{
-				response: []byte("enter text to save: entered credential models: {Data:}\n"),
+				response: []byte("enter text to save: entered text models: {Data:}\n"),
 				record:   &models.Record{Data: models.Data{Text: &models.Text{Data: ""}}},
 				err:      assert.NoError,
 			},
