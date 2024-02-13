@@ -59,7 +59,7 @@ func (c *Commands) confirmAndDeleteByID(record *models.Record, storage *inmemory
 		if err = storage.DeleteRecord(record.ID); err != nil {
 			return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandDelete, err)
 		}
-		c.iactr.Printf("Record sucessfully deleted\n")
+		c.iactr.Printf("Record successfully deleted\n")
 	} else {
 		c.iactr.Printf("Record deleting was interrupted by user\n")
 	}

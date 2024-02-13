@@ -36,8 +36,41 @@ const (
 	textValue = "some text"
 )
 
-func TestCommands_handleAdd(t *testing.T) {
+func getCommands(input string) (*Commands, *inmemory.Storage, *bytes.Buffer) {
+	reader := bytes.NewReader([]byte(input))
+	writer := bytes.NewBuffer(nil)
+	userInteractor := testutils.CreateUserInteractor(reader, writer, logger.CreateMock())
+
+	sm := statemachines.NewStateMachines(userInteractor)
+	bankCard := bankcard.NewBankCard(userInteractor, sm)
+	cred := credential.NewCredentials(userInteractor, sm)
+	txt := text.NewText(userInteractor, sm)
+
+	hash := hasher.CreateHasher(hashKey, hasher.TypeSHA256, logger.CreateMock())
 	dataCryptor := ska.NewSKA(cryptorKey, ska.Key16)
+
+	binaryConfig := binary.Config{
+		Iactr:   userInteractor,
+		Sm:      sm,
+		Hash:    hash,
+		Cryptor: dataCryptor,
+	}
+	bin := binary.NewBinary(&binaryConfig)
+
+	inMemoryStorage := inmemory.NewStorage(dataCryptor)
+
+	c := &Commands{
+		iactr:  userInteractor,
+		sm:     sm,
+		bc:     bankCard,
+		creds:  cred,
+		text:   txt,
+		binary: bin,
+	}
+	return c, inMemoryStorage, writer
+}
+
+func TestCommands_handleAdd(t *testing.T) {
 
 	type input struct {
 		command string
@@ -168,35 +201,7 @@ func TestCommands_handleAdd(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			reader := bytes.NewReader([]byte(tt.input.command))
-			writer := bytes.NewBuffer(nil)
-			userInteractor := testutils.CreateUserInteractor(reader, writer, logger.CreateMock())
-
-			sm := statemachines.NewStateMachines(userInteractor)
-			bankCard := bankcard.NewBankCard(userInteractor, sm)
-			cred := credential.NewCredentials(userInteractor, sm)
-			txt := text.NewText(userInteractor, sm)
-
-			hash := hasher.CreateHasher(hashKey, hasher.TypeSHA256, logger.CreateMock())
-
-			binaryConfig := binary.Config{
-				Iactr:   userInteractor,
-				Sm:      sm,
-				Hash:    hash,
-				Cryptor: dataCryptor,
-			}
-			bin := binary.NewBinary(&binaryConfig)
-
-			inMemoryStorage := inmemory.NewStorage(dataCryptor)
-
-			c := &Commands{
-				iactr:  userInteractor,
-				sm:     sm,
-				bc:     bankCard,
-				creds:  cred,
-				text:   txt,
-				binary: bin,
-			}
+			c, inMemoryStorage, writer := getCommands(tt.input.command)
 
 			record, err := c.handleAdd(tt.args.recordType, inMemoryStorage)
 			tt.want.err(t, err, "err assertion fail")
@@ -291,7 +296,6 @@ func TestCommands_handleCommandError(t *testing.T) {
 }
 
 func TestCommands_Add(t *testing.T) {
-	dataCryptor := ska.NewSKA(cryptorKey, ska.Key16)
 	type input struct {
 		command string
 	}
@@ -360,35 +364,7 @@ func TestCommands_Add(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			reader := bytes.NewReader([]byte(tt.input.command))
-			writer := bytes.NewBuffer(nil)
-			userInteractor := testutils.CreateUserInteractor(reader, writer, logger.CreateMock())
-
-			sm := statemachines.NewStateMachines(userInteractor)
-			bankCard := bankcard.NewBankCard(userInteractor, sm)
-			cred := credential.NewCredentials(userInteractor, sm)
-			txt := text.NewText(userInteractor, sm)
-
-			hash := hasher.CreateHasher(hashKey, hasher.TypeSHA256, logger.CreateMock())
-
-			binaryConfig := binary.Config{
-				Iactr:   userInteractor,
-				Sm:      sm,
-				Hash:    hash,
-				Cryptor: dataCryptor,
-			}
-			bin := binary.NewBinary(&binaryConfig)
-
-			inMemoryStorage := inmemory.NewStorage(dataCryptor)
-
-			c := &Commands{
-				iactr:  userInteractor,
-				sm:     sm,
-				bc:     bankCard,
-				creds:  cred,
-				text:   txt,
-				binary: bin,
-			}
+			c, inMemoryStorage, writer := getCommands(tt.input.command)
 
 			c.Add(tt.args.parts, inMemoryStorage)
 			assert.Equal(t, tt.want.response, writer.Bytes(), "response fail")
