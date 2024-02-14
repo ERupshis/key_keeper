@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	cryptorKey = "some key"
-	hashKey    = "some key"
+	cryptorKey = "pass"
+	hashKey    = ""
 
 	cardNumber     = "1234 1234 1234 1234"
 	cardExpiration = "12/23"
