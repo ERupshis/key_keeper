@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -44,6 +45,8 @@ func (bm *BinaryManager) SaveBinaries(binaries map[string][]byte) error {
 func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string][]byte, error) {
 	g := errgroup.Group{}
 	res := make(map[string][]byte)
+	mu := sync.Mutex{}
+
 	for k := range binFilesList {
 		k := k
 		g.Go(func() error {
@@ -52,7 +55,10 @@ func (bm *BinaryManager) GetFiles(binFilesList map[string]struct{}) (map[string]
 				return fmt.Errorf("read binary file: %w", err)
 			}
 
+			mu.Lock()
 			res[k] = fileBytes
+			mu.Unlock()
+
 			return nil
 		})
 	}
