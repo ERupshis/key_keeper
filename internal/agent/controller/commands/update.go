@@ -52,7 +52,7 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 	case models.TypeBankCard:
 		err = c.bc.ProcessUpdateCommand(tmpRecord)
 	case models.TypeCredentials:
-		err = c.bc.ProcessUpdateCommand(tmpRecord)
+		err = c.creds.ProcessUpdateCommand(tmpRecord)
 	case models.TypeText:
 		err = c.text.ProcessUpdateCommand(tmpRecord)
 	case models.TypeBinary:
@@ -78,7 +78,7 @@ func (c *Commands) confirmAndUpdateRecordByID(record *models.Record, storage *in
 		if err = storage.UpdateRecord(record); err != nil {
 			return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 		}
-		c.iactr.Printf("Record sucessfully updated\n")
+		c.iactr.Printf("Record successfully updated\n")
 	} else {
 		c.iactr.Printf("Record updating was interrupted by user\n")
 	}

@@ -11,7 +11,7 @@ func (s *Storage) GetRecord(id int64) (*models.Record, error) {
 		}
 	}
 
-	return nil, nil
+	return nil, ErrRecordNotFound
 }
 
 func (s *Storage) GetAllRecords() ([]models.Record, error) {
@@ -55,7 +55,7 @@ func canRecordBeReturned(record *models.Record, recordType models.RecordType) bo
 		return false
 	}
 
-	if record.Data.RecordType != recordType && !(recordType == models.TypeAny) {
+	if record.Data.RecordType != recordType && recordType != models.TypeAny {
 		return false
 	}
 

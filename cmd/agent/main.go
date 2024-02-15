@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -57,16 +58,16 @@ func main() {
 	}
 	defer deferutils.ExecSilent(logs.Sync)
 
-	reader := interactor.NewReader(os.Stdin)
-	writer := interactor.NewWriter(os.Stdout)
-	userInteractor := interactor.NewInteractor(reader, writer)
+	reader := interactor.NewReader(bufio.NewReader(os.Stdin))
+	writer := interactor.NewWriter(bufio.NewWriter(os.Stdout))
+	userInteractor := interactor.NewInteractor(reader, writer, logs)
 
 	sm := statemachines.NewStateMachines(userInteractor)
 	bankCard := bankcard.NewBankCard(userInteractor, sm)
 	cred := credential.NewCredentials(userInteractor, sm)
 	txt := text.NewText(userInteractor, sm)
 
-	dataCryptor := ska.NewSKA("some user key", ska.Key16)
+	dataCryptor := ska.NewSKA("some user key", ska.Key16) // TODO: need to move param in config.
 	hash := hasher.CreateHasher(cfg.HashKey, hasher.TypeSHA256, logs)
 
 	binaryConfig := binary.Config{

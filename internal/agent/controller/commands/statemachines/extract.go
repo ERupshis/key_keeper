@@ -108,5 +108,6 @@ func (s *StateMachines) stateFilePath() (extractPathState, string, error) {
 		return extractPathFilePathState, "", nil
 	}
 
+	pathToFile = string(append([]rune(filepath.Dir(pathToFile)), filepath.Separator))
 	return extractPathFinishState, pathToFile, nil
 }

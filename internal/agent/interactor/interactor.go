@@ -9,27 +9,31 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
+	"github.com/erupshis/key_keeper/internal/common/logger"
+	"github.com/erupshis/key_keeper/internal/common/utils/deferutils"
 )
 
 type Interactor struct {
-	rd *Reader
-	wr *Writer
+	rd   *Reader
+	wr   *Writer
+	logs logger.BaseLogger
 }
 
-func NewInteractor(rd *Reader, wr *Writer) *Interactor {
+func NewInteractor(rd *Reader, wr *Writer, logs logger.BaseLogger) *Interactor {
 	return &Interactor{
-		rd: rd,
-		wr: wr,
+		rd:   rd,
+		wr:   wr,
+		logs: logs,
 	}
 }
 
 func (i *Interactor) Printf(format string, a ...any) int {
-	defer func() {
-		_ = i.wr.Flush()
-	}()
+	defer deferutils.ExecWithLogError(i.wr.Flush, i.logs)
 
-	n, _ := fmt.Fprintf(i.wr, format, a...) // TODO: handle error.
-
+	n, err := fmt.Fprintf(i.wr, format, a...)
+	if err != nil {
+		i.logs.Infof("print data in writer: %v", err)
+	}
 	return n
 }
 
@@ -66,7 +70,7 @@ func (i *Interactor) GetUserInputAndValidate(regex *regexp.Regexp) (string, bool
 	}
 
 	input = strings.TrimSpace(strings.TrimRight(input, "\r\n"))
-	if input == utils.CommandCancel || errors.Is(err, io.EOF) {
+	if input == utils.CommandCancel {
 		return input, true, errs.ErrInterruptedByUser
 	}
 

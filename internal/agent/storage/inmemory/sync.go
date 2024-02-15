@@ -3,9 +3,12 @@ package inmemory
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
+	"sync"
 
 	"github.com/erupshis/key_keeper/internal/agent/models"
 	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
+	"golang.org/x/sync/errgroup"
 )
 
 func (s *Storage) GetAllRecordsForServer() ([]localModels.StorageRecord, error) {
@@ -35,15 +38,16 @@ func (s *Storage) GetAllRecordsForServer() ([]localModels.StorageRecord, error) 
 }
 
 func (s *Storage) RemoveLocalRecords() error {
-	recordsToRemoveCount := 0
-	for idx := range s.records {
-		if s.records[idx].ID <= 0 {
-			s.records[idx], s.records[len(s.records)-1-recordsToRemoveCount] = s.records[len(s.records)-1-recordsToRemoveCount], s.records[idx]
-			recordsToRemoveCount++
-		}
-	}
+	sort.Slice(s.records, func(l, r int) bool {
+		return s.records[l].ID < s.records[r].ID
+	})
 
-	s.records = s.records[:(len(s.records) - recordsToRemoveCount)]
+	trimIdx := sort.Search(len(s.records), func(idx int) bool {
+		return s.records[idx].ID > 0
+	})
+
+	s.records = s.records[trimIdx:]
+	s.resetNextFreeIdx()
 	return nil
 }
 
@@ -58,21 +62,36 @@ func (s *Storage) Sync(serverRecords map[int64]localModels.StorageRecord) error 
 
 func (s *Storage) syncLocalRecords(serverRecords map[int64]localModels.StorageRecord) (map[int64]struct{}, error) {
 	syncedRecordsIdxs := map[int64]struct{}{}
+
+	g := errgroup.Group{}
+	mu := sync.Mutex{}
+
 	for idx := range s.records {
+		idx := idx
 		if serverRecord, ok := serverRecords[s.records[idx].ID]; ok {
-			if serverRecord.UpdatedAt.After(s.records[idx].UpdatedAt) {
-				data, err := s.parseRecordData(&serverRecord)
-				if err != nil {
-					return nil, fmt.Errorf("sync local and server data: %w", err)
+			g.Go(func() error {
+				if serverRecord.UpdatedAt.After(s.records[idx].UpdatedAt) {
+					data, err := s.parseRecordData(&serverRecord)
+					if err != nil {
+						return fmt.Errorf("sync local and server data: %w", err)
+					}
+
+					s.records[idx].Data = *data
+					s.records[idx].UpdatedAt = serverRecord.UpdatedAt
+					s.records[idx].Deleted = serverRecord.Deleted
 				}
 
-				s.records[idx].Data = *data
-				s.records[idx].UpdatedAt = serverRecord.UpdatedAt
-				s.records[idx].Deleted = serverRecord.Deleted
-			}
+				mu.Lock()
+				syncedRecordsIdxs[serverRecord.ID] = struct{}{}
+				mu.Unlock()
+				return nil
+			})
 
-			syncedRecordsIdxs[serverRecord.ID] = struct{}{}
 		}
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	return syncedRecordsIdxs, nil

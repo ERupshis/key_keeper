@@ -65,8 +65,6 @@ func (c *Credential) stateInitial() addState {
 
 func (c *Credential) stateLogin(record *models.Record) (addState, error) {
 	credLogin, ok, err := c.iactr.GetUserInputAndValidate(nil)
-	record.Data.Credentials.Login = credLogin
-
 	if !ok {
 		return addLoginState, err
 	}
@@ -75,6 +73,7 @@ func (c *Credential) stateLogin(record *models.Record) (addState, error) {
 		return addLoginState, err
 	}
 
+	record.Data.Credentials.Login = credLogin
 	c.iactr.Printf("enter credential password: ")
 	return addPasswordState, err
 
@@ -82,7 +81,6 @@ func (c *Credential) stateLogin(record *models.Record) (addState, error) {
 
 func (c *Credential) statePassword(record *models.Record) (addState, error) {
 	credPassword, ok, err := c.iactr.GetUserInputAndValidate(nil)
-	record.Data.Credentials.Password = credPassword
 	if !ok {
 		return addPasswordState, err
 	}
@@ -91,6 +89,7 @@ func (c *Credential) statePassword(record *models.Record) (addState, error) {
 		return addPasswordState, err
 	}
 
+	record.Data.Credentials.Password = credPassword
 	c.iactr.Printf("entered credential models: %+v\n", *record.Data.Credentials)
 	return addFinishState, err
 }

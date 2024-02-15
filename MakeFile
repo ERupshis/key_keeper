@@ -1,4 +1,4 @@
-.PHONY: docker_down docker_up containers proto build
+.PHONY: docker_down docker_up containers proto build coverage size lint static test
 
 
 docker_down:
@@ -19,6 +19,25 @@ proto:
 		--go-grpc_out=./pb \
 		--go-grpc_opt=paths=source_relative \
 		./pb/keykeep.proto
+
+coverage:
+	go test -tags ignoretests -coverprofile=coverage.out ./... && \
+    go tool cover -html=coverage.out && \
+    go tool cover -func=coverage.out | fgrep total
+
+size:
+	git ls-files | xargs wc -l
+
+lint:
+	golangci-lint run
+
+static:
+	staticcheck ./...
+
+test:
+	go test -race -count=1 ./...
+
+
 
 BINARY_NAME=key_keeper
 BUILD_DIR=build

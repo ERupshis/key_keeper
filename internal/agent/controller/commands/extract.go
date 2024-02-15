@@ -10,8 +10,8 @@ import (
 )
 
 func (c *Commands) Extract(parts []string, storage *inmemory.Storage) {
-	supportedTypes := []string{models.StrText, models.StrBinary}
-	if len(parts) != 2 {
+	supportedTypes := []string{models.StrBinary}
+	if len(parts) != 2 || parts[1] != models.StrBinary {
 		c.iactr.Printf("incorrect request. should contain command '%s' and object type(%s)\n", utils.CommandExtract, supportedTypes)
 		return
 	}
@@ -36,7 +36,7 @@ func (c *Commands) handleExtract(records []models.Record) error {
 			err = c.binary.ProcessExtractCommand(&records[0])
 		case models.TypeText:
 		default:
-			c.iactr.Printf("unsupported type '%s' for extracting", models.ConvertRecordTypeToString(records[0].Data.RecordType))
+			c.iactr.Printf("attempt to extract unsupported type '%s'\n", models.ConvertRecordTypeToString(records[0].Data.RecordType))
 		}
 	} else {
 		c.iactr.Printf("need more detailed request. (Only one record should be selected)\n")
