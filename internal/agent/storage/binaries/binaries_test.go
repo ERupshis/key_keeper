@@ -174,7 +174,7 @@ func TestBinaryManager_SyncFiles(t *testing.T) {
 				fileWOExtRemove2: fileWOExtData,
 			}
 
-			assert.NoError(t, os.Mkdir("SyncFiles", 0o666))
+			assert.NoError(t, os.Mkdir("SyncFiles", 0o755))
 			for name, data := range filesInFolder {
 				assert.NoError(t, os.WriteFile(filepath.Join(wd, "SyncFiles", name), []byte(data), 0o666))
 			}
@@ -282,7 +282,7 @@ func TestBinaryManager_GetFiles(t *testing.T) {
 				fileWOExtRemove2: fileWOExtData,
 			}
 
-			assert.NoError(t, os.Mkdir("GetFiles", 0o666))
+			assert.NoError(t, os.Mkdir("GetFiles", 0o755))
 			for name, data := range filesInFolder {
 				assert.NoError(t, os.WriteFile(filepath.Join(wd, "GetFiles", name), []byte(data), 0o666))
 			}
@@ -350,7 +350,7 @@ func TestBinaryManager_SaveBinaries(t *testing.T) {
 			bm := &BinaryManager{
 				path: tt.fields.path,
 			}
-			assert.NoError(t, os.Mkdir(tt.fields.path, 0o666))
+			assert.NoError(t, os.Mkdir(tt.fields.path, 0o755))
 			tt.want.err(t, bm.SaveBinaries(tt.args.binaries), fmt.Sprintf("SaveBinaries(%v)", tt.args.binaries))
 
 			for _, name := range tt.args.toRemoveAfterTest {
