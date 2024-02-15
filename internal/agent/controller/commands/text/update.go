@@ -2,10 +2,10 @@ package text
 
 import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (t *Text) ProcessUpdateCommand(record *data.Record) error {
+func (t *Text) ProcessUpdateCommand(record *models.Record) error {
 	cfg := statemachines.AddConfig{
 		Record:   record,
 		MainData: t.addMainData,

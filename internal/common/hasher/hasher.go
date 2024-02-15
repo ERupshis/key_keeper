@@ -32,7 +32,7 @@ type readCloserWrapper struct {
 	io.Closer
 }
 
-// Hasher stores hash related config data.
+// Hasher stores hash related config models.
 type Hasher struct {
 	log      logger.BaseLogger
 	hashType HashType // type of algorithm

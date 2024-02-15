@@ -107,6 +107,13 @@ func padData(data []byte, blockSize int) []byte {
 }
 
 func unPadData(data []byte) []byte {
+	if len(data) == 0 {
+		return data
+	}
+
 	padding := int(data[len(data)-1])
+	if len(data) < padding {
+		return data
+	}
 	return data[:len(data)-padding]
 }

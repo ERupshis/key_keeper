@@ -1,25 +1,25 @@
 package inmemory
 
 import (
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (s *Storage) GetRecord(id int64) (*data.Record, error) {
+func (s *Storage) GetRecord(id int64) (*models.Record, error) {
 	for _, rec := range s.records {
 		if rec.ID == id {
 			return &rec, nil
 		}
 	}
 
-	return nil, nil
+	return nil, ErrRecordNotFound
 }
 
-func (s *Storage) GetAllRecords() ([]data.Record, error) {
+func (s *Storage) GetAllRecords() ([]models.Record, error) {
 	return s.records, nil
 }
 
-func (s *Storage) GetRecords(recordType data.RecordType, filters map[string]string) ([]data.Record, error) {
-	var res []data.Record
+func (s *Storage) GetRecords(recordType models.RecordType, filters map[string]string) ([]models.Record, error) {
+	var res []models.Record
 	for idx := range s.records {
 		if !canRecordBeReturned(&s.records[idx], recordType) {
 			continue
@@ -33,26 +33,43 @@ func (s *Storage) GetRecords(recordType data.RecordType, filters map[string]stri
 	return res, nil
 }
 
-func canRecordBeReturned(record *data.Record, recordType data.RecordType) bool {
+func (s *Storage) GetBinFilesList() map[string]struct{} {
+	res := make(map[string]struct{})
+	for _, record := range s.records {
+		if record.Data.Binary == nil {
+			continue
+		}
+
+		if record.Deleted {
+			continue
+		}
+
+		res[record.Data.Binary.SecuredFileName] = struct{}{}
+	}
+
+	return res
+}
+
+func canRecordBeReturned(record *models.Record, recordType models.RecordType) bool {
 	if record.Deleted {
 		return false
 	}
 
-	if record.RecordType != recordType && !(recordType == data.TypeAny) {
+	if record.Data.RecordType != recordType && recordType != models.TypeAny {
 		return false
 	}
 
 	return true
 }
 
-func isRecordMatchToFilters(record *data.Record, filters map[string]string) bool {
+func isRecordMatchToFilters(record *models.Record, filters map[string]string) bool {
 	match := true
 	if len(filters) == 0 {
 		return true
 	}
 
 	for key, val := range filters {
-		if key == data.StrAny {
+		if key == models.StrAny {
 			match = isSomeRecordMetaDataHasValue(record, val)
 			if !match {
 				break
@@ -61,7 +78,7 @@ func isRecordMatchToFilters(record *data.Record, filters map[string]string) bool
 			continue
 		}
 
-		if metaValue, ok := record.MetaData[key]; !ok || val != metaValue {
+		if metaValue, ok := record.Data.MetaData[key]; !ok || val != metaValue {
 			match = false
 			break
 		}
@@ -70,8 +87,8 @@ func isRecordMatchToFilters(record *data.Record, filters map[string]string) bool
 	return match
 }
 
-func isSomeRecordMetaDataHasValue(record *data.Record, val string) bool {
-	for _, metaVal := range record.MetaData {
+func isSomeRecordMetaDataHasValue(record *models.Record, val string) bool {
+	for _, metaVal := range record.Data.MetaData {
 		if val == metaVal {
 			return true
 		}

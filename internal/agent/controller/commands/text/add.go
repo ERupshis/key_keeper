@@ -5,12 +5,12 @@ import (
 
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
 	"github.com/erupshis/key_keeper/internal/agent/errs"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (t *Text) ProcessAddCommand(record *data.Record) error {
-	record.Text = &data.Text{}
-	record.RecordType = data.TypeText
+func (t *Text) ProcessAddCommand(record *models.Record) error {
+	record.Data.Text = &models.Text{}
+	record.Data.RecordType = models.TypeText
 
 	cfg := statemachines.AddConfig{
 		Record:   record,
@@ -29,7 +29,7 @@ const (
 	addFinishState  = addState(2)
 )
 
-func (t *Text) addMainData(record *data.Record) error {
+func (t *Text) addMainData(record *models.Record) error {
 	currentState := addInitialState
 
 	var err error
@@ -55,10 +55,8 @@ func (t *Text) stateInitial() addState {
 	return addDataState
 }
 
-func (t *Text) stateData(record *data.Record) (addState, error) {
+func (t *Text) stateData(record *models.Record) (addState, error) {
 	text, ok, err := t.iactr.GetUserInputAndValidate(nil)
-	record.Text.Data = text
-
 	if !ok {
 		return addDataState, err
 	}
@@ -67,7 +65,8 @@ func (t *Text) stateData(record *data.Record) (addState, error) {
 		return addDataState, err
 	}
 
-	t.iactr.Printf("entered credential data: %+v\n", *record.Text)
+	record.Data.Text.Data = text
+	t.iactr.Printf("entered text models: %+v\n", *record.Data.Text)
 	return addFinishState, err
 
 }

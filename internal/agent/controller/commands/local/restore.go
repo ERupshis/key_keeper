@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
@@ -81,6 +82,10 @@ func (l *Local) stateInitial(localStorage *local.FileManager) restoreState {
 func (l *Local) statePassPhrase() (restoreState, string, error) {
 	passPhrase, ok, err := l.iactr.GetUserInputAndValidate(nil)
 
+	if ok && errors.Is(err, io.EOF) {
+		return restorePassPhrase, "", err
+	}
+
 	if ok && errors.Is(err, errs.ErrInterruptedByUser) {
 		return restoreNewStoragePath, "", nil
 	}
@@ -96,8 +101,8 @@ func (l *Local) stateStorageDecode(ctx context.Context, inmemory *inmemory.Stora
 		return restorePassPhrase, nil
 	}
 
-	if err = inmemory.AddRecords(records); err != nil {
-		return restoreStorageDecode, fmt.Errorf("write local storage data in memory: %w", err)
+	if err = inmemory.RestoreRecords(records); err != nil {
+		return restoreStorageDecode, fmt.Errorf("write local storage models in memory: %w", err)
 	}
 
 	return restoreFinishState, nil

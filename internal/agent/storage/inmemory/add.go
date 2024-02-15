@@ -3,23 +3,22 @@ package inmemory
 import (
 	"time"
 
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (s *Storage) AddRecord(record *data.Record) error {
-	record.ID = s.getNextFreeIdx()
-	record.UpdatedAt = time.Now()
+var (
+	zeroTime = time.Time{}
+)
 
-	s.records = append(s.records, *record)
-	return nil
-}
-
-func (s *Storage) AddRecords(records []data.Record) error {
-	for idx := range records {
-		records[idx].ID = s.getNextFreeIdx()
-		records[idx].UpdatedAt = time.Now()
+func (s *Storage) AddRecord(record *models.Record) error {
+	if record.ID <= 0 {
+		record.ID = s.getNextFreeIdx()
 	}
 
-	s.records = append(s.records, records...)
+	if record.UpdatedAt == zeroTime {
+		record.UpdatedAt = time.Now()
+	}
+
+	s.records = append(s.records, *record)
 	return nil
 }

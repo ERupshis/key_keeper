@@ -2,10 +2,10 @@ package bankcard
 
 import (
 	"github.com/erupshis/key_keeper/internal/agent/controller/commands/statemachines"
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 )
 
-func (b *BankCard) ProcessUpdateCommand(record *data.Record) error {
+func (b *BankCard) ProcessUpdateCommand(record *models.Record) error {
 	cfg := statemachines.AddConfig{
 		Record:   record,
 		MainData: b.addMainData,

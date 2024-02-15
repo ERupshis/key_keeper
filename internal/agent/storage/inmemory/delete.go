@@ -17,5 +17,5 @@ func (s *Storage) DeleteRecord(id int64) error {
 		}
 	}
 
-	return nil
+	return ErrRecordNotFound
 }

@@ -48,7 +48,7 @@ func (s *StateMachines) Delete() (*int64, error) {
 }
 
 func (s *StateMachines) stateDeleteIDInitial() stateDelete {
-	fmt.Printf("enter record %s: ", utils.CommandID)
+	s.iactr.Printf("enter record %s: ", utils.CommandID)
 	return deleteIDState
 }
 

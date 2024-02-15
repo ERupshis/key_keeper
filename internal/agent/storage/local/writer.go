@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/erupshis/key_keeper/internal/common/data"
+	"github.com/erupshis/key_keeper/internal/agent/models"
+	localModels "github.com/erupshis/key_keeper/internal/agent/storage/models"
 )
 
-// fileWriter is responsible for writing user data into the file.
+// fileWriter is responsible for writing user models into the file.
 type fileWriter struct {
 	file   *os.File
 	writer *bufio.Writer
@@ -33,25 +34,37 @@ func (fm *FileManager) initWriter(withTrunc bool) error {
 }
 
 // WriteRecord writes a user record into the file.
-func (fm *FileManager) WriteRecord(record *data.Record) error {
+func (fm *FileManager) WriteRecord(record *models.Record) error {
 	errMsg := "write record: %w"
 
 	if !fm.IsFileOpen() {
 		return fmt.Errorf(errMsg, ErrFileIsNotOpen)
 	}
 
-	recordBytes, err := json.Marshal(record)
+	recordDataBytes, err := json.Marshal(record.Data)
 	if err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	encryptedRecord, err := fm.cryptHasher.Encrypt(recordBytes)
+	encryptedDataRecord, err := fm.cryptHasher.Encrypt(recordDataBytes)
 	if err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 
-	encryptedRecord = append(encryptedRecord, '\n')
-	if _, err = fm.write(encryptedRecord); err != nil {
+	storageRecord := localModels.StorageRecord{
+		ID:        record.ID,
+		Data:      encryptedDataRecord,
+		Deleted:   record.Deleted,
+		UpdatedAt: record.UpdatedAt,
+	}
+
+	storageRecordBytes, err := json.Marshal(storageRecord)
+	if err != nil {
+		return fmt.Errorf(errMsg, err)
+	}
+
+	storageRecordBytes = append(storageRecordBytes, '\n')
+	if _, err = fm.write(storageRecordBytes); err != nil {
 		return fmt.Errorf(errMsg, err)
 	}
 
@@ -63,7 +76,7 @@ func (fm *FileManager) WriteRecord(record *data.Record) error {
 	return nil
 }
 
-// write writes data to the file.
+// write writes models to the file.
 func (fm *FileManager) write(data []byte) (int, error) {
 	return fm.writer.writer.Write(data)
 }

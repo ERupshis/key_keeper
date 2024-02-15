@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/erupshis/key_keeper/internal/agent/errs"
+	"github.com/erupshis/key_keeper/internal/agent/models"
 	"github.com/erupshis/key_keeper/internal/agent/storage/inmemory"
 	"github.com/erupshis/key_keeper/internal/agent/utils"
-	"github.com/erupshis/key_keeper/internal/common/data"
 )
 
 func (c *Commands) Update(parts []string, storage *inmemory.Storage) {
@@ -42,20 +42,20 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 	}
 
 	if len(records) != 1 {
-		fmt.Printf("Record with id '%d' was not found\n", id)
+		c.iactr.Printf("Record with id '%d' was not found\n", id)
 		return nil
 	}
 
-	tmpRecord := data.DeepCopyRecord(&records[0])
-	tmpRecord.MetaData = make(data.MetaData)
-	switch records[0].RecordType {
-	case data.TypeBankCard:
+	tmpRecord := models.DeepCopyRecord(&records[0])
+	tmpRecord.Data.MetaData = make(models.MetaData)
+	switch records[0].Data.RecordType {
+	case models.TypeBankCard:
 		err = c.bc.ProcessUpdateCommand(tmpRecord)
-	case data.TypeCredentials:
-		err = c.bc.ProcessUpdateCommand(tmpRecord)
-	case data.TypeText:
+	case models.TypeCredentials:
+		err = c.creds.ProcessUpdateCommand(tmpRecord)
+	case models.TypeText:
 		err = c.text.ProcessUpdateCommand(tmpRecord)
-	case data.TypeBinary:
+	case models.TypeBinary:
 		err = c.binary.ProcessUpdateCommand(tmpRecord)
 	default:
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, errs.ErrIncorrectRecordType)
@@ -68,7 +68,7 @@ func (c *Commands) findAndUpdateRecordByID(id int64, storage *inmemory.Storage) 
 	return c.confirmAndUpdateRecordByID(tmpRecord, storage)
 }
 
-func (c *Commands) confirmAndUpdateRecordByID(record *data.Record, storage *inmemory.Storage) error {
+func (c *Commands) confirmAndUpdateRecordByID(record *models.Record, storage *inmemory.Storage) error {
 	confirmed, err := c.sm.Confirm(record, utils.CommandUpdate)
 	if err != nil {
 		return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
@@ -78,7 +78,7 @@ func (c *Commands) confirmAndUpdateRecordByID(record *data.Record, storage *inme
 		if err = storage.UpdateRecord(record); err != nil {
 			return fmt.Errorf(errs.ErrProcessMsgBody, utils.CommandUpdate, err)
 		}
-		c.iactr.Printf("Record sucessfully updated\n")
+		c.iactr.Printf("Record successfully updated\n")
 	} else {
 		c.iactr.Printf("Record updating was interrupted by user\n")
 	}

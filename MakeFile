@@ -1,0 +1,50 @@
+.PHONY: docker_down docker_up containers proto build coverage size lint static test
+
+
+docker_down:
+	docker-compose stop
+	docker-compose down
+	docker rmi server
+
+docker_up:
+	docker-compose up
+
+containers:
+	docker ps -a
+
+proto:
+	protoc --proto_path=./pb/ \
+		--go_out=./pb \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=./pb \
+		--go-grpc_opt=paths=source_relative \
+		./pb/keykeep.proto
+
+coverage:
+	go test -tags ignoretests -coverprofile=coverage.out ./... && \
+    go tool cover -html=coverage.out && \
+    go tool cover -func=coverage.out | fgrep total
+
+size:
+	git ls-files | xargs wc -l
+
+lint:
+	golangci-lint run
+
+static:
+	staticcheck ./...
+
+test:
+	go test -race -count=1 ./...
+
+
+
+BINARY_NAME=key_keeper
+BUILD_DIR=build
+VERSION=0.1.0
+SOURCE_DIR=./cmd/agent/
+
+build:
+	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(VERSION) -X 'main.buildDate=$(shell date)' -X 'main.buildCommit=$(shell git rev-parse HEAD)'" -o $(BUILD_DIR)/$(BINARY_NAME)_$(VERSION)_windows_amd64.exe $(SOURCE_DIR)
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(VERSION) -X 'main.buildDate=$(shell date)' -X 'main.buildCommit=$(shell git rev-parse HEAD)'" -o $(BUILD_DIR)/$(BINARY_NAME)_$(VERSION)_darwin_amd64 $(SOURCE_DIR)
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(VERSION) -X 'main.buildDate=$(shell date)' -X 'main.buildCommit=$(shell git rev-parse HEAD)'" -o $(BUILD_DIR)/$(BINARY_NAME)_$(VERSION)_linux_amd64 $(SOURCE_DIR)

@@ -1,4 +1,4 @@
-package data
+package models
 
 func ConvertStringToRecordType(str string) RecordType {
 	switch str {
@@ -35,22 +35,22 @@ func ConvertRecordTypeToString(recordType RecordType) string {
 }
 
 func getRecordValue(record *Record) interface{} {
-	switch record.RecordType {
+	switch record.Data.RecordType {
 	case TypeCredentials:
-		if record.Credentials != nil {
-			return *record.Credentials
+		if record.Data.Credentials != nil {
+			return *record.Data.Credentials
 		}
 	case TypeBankCard:
-		if record.BankCard != nil {
-			return *record.BankCard
+		if record.Data.BankCard != nil {
+			return *record.Data.BankCard
 		}
 	case TypeText:
-		if record.Text != nil {
-			return *record.Text
+		if record.Data.Text != nil {
+			return *record.Data.Text
 		}
 	case TypeBinary:
-		if record.Binary != nil {
-			return *record.Binary
+		if record.Data.Binary != nil {
+			return *record.Data.Binary
 		}
 	}
 
@@ -60,31 +60,31 @@ func getRecordValue(record *Record) interface{} {
 func DeepCopyRecord(record *Record) *Record {
 	var res Record
 	res.ID = record.ID
-	res.RecordType = record.RecordType
+	res.Data.RecordType = record.Data.RecordType
 
-	res.MetaData = make(MetaData)
-	for key, val := range record.MetaData {
-		res.MetaData[key] = val
+	res.Data.MetaData = make(MetaData)
+	for key, val := range record.Data.MetaData {
+		res.Data.MetaData[key] = val
 	}
 
-	if record.Credentials != nil {
-		tmpCredentials := *record.Credentials
-		res.Credentials = &tmpCredentials
+	if record.Data.Credentials != nil {
+		tmpCredentials := *record.Data.Credentials
+		res.Data.Credentials = &tmpCredentials
 	}
 
-	if record.BankCard != nil {
-		tmpBankCard := *record.BankCard
-		res.BankCard = &tmpBankCard
+	if record.Data.BankCard != nil {
+		tmpBankCard := *record.Data.BankCard
+		res.Data.BankCard = &tmpBankCard
 	}
 
-	if record.Text != nil {
-		tmpText := *record.Text
-		res.Text = &tmpText
+	if record.Data.Text != nil {
+		tmpText := *record.Data.Text
+		res.Data.Text = &tmpText
 	}
 
-	if record.Binary != nil {
-		tmpBinary := *record.Binary
-		res.Binary = &tmpBinary
+	if record.Data.Binary != nil {
+		tmpBinary := *record.Data.Binary
+		res.Data.Binary = &tmpBinary
 	}
 
 	return &res
